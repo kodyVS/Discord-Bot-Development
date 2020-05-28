@@ -4,7 +4,7 @@ from time import sleep
 import requests
 from bs4 import BeautifulSoup
 import json
-
+import winsound
 with open("src/DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
@@ -41,7 +41,7 @@ async def timer(ctx, minutes=25):
             print(time)
         if time == 0:
             await ctx.send('Times up!!!')
-            #We can also play a sound here using the 'winsound' module for fun.
+            winsound.Beep(400, 200) #A short beep to show that the timer ended
             break
 @bot.command(name='github')
 async def fetch(ctx):
@@ -49,6 +49,6 @@ async def fetch(ctx):
     #Might need some cleaning up as the output looks kind of messy.
     page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
     jsonpage =  json.loads(page.content)
-    await ctx.send([(repo["name"], repo["author"]) for repo in jsonpage])
+    await ctx.send([(repo["name"], repo["author"]) for repo in jsonpage], ':github:')
 # client.run(TOKEN)  # way1
 bot.run(TOKEN)  # way2
