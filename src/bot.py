@@ -15,7 +15,6 @@ bot = commands.Bot(command_prefix='!')  # way 2, you cant use both ways
 
 @bot.command(name="hello", aliases=["hi", "hey", "hallo"])
 async def world(ctx):
-    print('test')
     await ctx.send('world!')
 
 
