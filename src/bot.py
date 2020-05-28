@@ -1,7 +1,7 @@
 from discord.ext import commands
 import random
 
-with open("../DISCORD_TOKEN.txt", "r") as code:
+with open("src/DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
 # client = discord.Client()  # way 1
@@ -12,10 +12,12 @@ with open("../DISCORD_TOKEN.txt", "r") as code:
 
 bot = commands.Bot(command_prefix='!')  # way 2, you cant use both ways
 
+
 @bot.command(name="hello", aliases=["hi", "hey", "hallo"])
 async def world(ctx):
     print('test')
     await ctx.send('world!')
+
 
 @bot.command(name='roll_dice', help='Simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
