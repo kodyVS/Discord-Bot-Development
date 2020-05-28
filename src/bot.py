@@ -1,7 +1,7 @@
 from discord.ext import commands
 import random
 
-with open("src/DISCORD_TOKEN.txt", "r") as code:
+with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
 # client = discord.Client()  # way 1
