@@ -50,5 +50,9 @@ async def fetch(ctx):
     page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
     jsonpage =  json.loads(page.content)
     await ctx.send([(repo["name"], repo["author"]) for repo in jsonpage])
+@bot.command(name='eval')
+async def run(ctx, content='"Content not set"'):
+    output = eval(content)
+    await ctx.send(f'Output: {output}')
 # client.run(TOKEN)  # way1
 bot.run(TOKEN)  # way2
