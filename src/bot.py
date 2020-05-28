@@ -1,16 +1,13 @@
-import os
 import discord
 
-from dotenv import load_dotenv
-
-load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+with open("DISCORD_TOKEN.txt", "r") as code:
+    TOKEN = code.readlines()[0]
 
 client = discord.Client()
 
 
 @client.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+    print(f'{client.user.name} has connected to Discord!')
 
 client.run(TOKEN)
