@@ -45,11 +45,17 @@ async def timer(ctx, minutes=25):
             break
 @bot.command(name='github')
 async def fetch(ctx):
-    #This function uses the github api to fetch the top daily repos names along with there authors in json form.
-    #Might need some cleaning up as the output looks kind of messy.
     page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
     jsonpage =  json.loads(page.content)
-    await ctx.send([(repo["name"], repo["author"]) for repo in jsonpage])
+    pretty_list = []
+    lst = ([(repo["name"], repo["author"]) for repo in jsonpage])
+    good_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz '
+    for ele in lst:
+      ele = ' '.join(ele[i] for i in range(len(ele)))
+      pretty_list.append(ele)
+    for char in str(pretty_list):
+        if char not in  good_chars: pretty_list = str(pretty_list).replace(char, ' ')
+    await ctx.send(pretty_list)
 @bot.command(name='eval')
 async def run(ctx, content='"Content not set"'):
     output = eval(content)
