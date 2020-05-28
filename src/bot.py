@@ -49,6 +49,6 @@ async def fetch(ctx):
     #Might need some cleaning up as the output looks kind of messy.
     page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
     jsonpage =  json.loads(page.content)
-    await ctx.send([(repo["name"], repo["author"]) for repo in jsonpage], ':github:')
+    await ctx.send([(repo["name"], repo["author"]) for repo in jsonpage])
 # client.run(TOKEN)  # way1
 bot.run(TOKEN)  # way2
