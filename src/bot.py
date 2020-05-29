@@ -88,6 +88,7 @@ async def fetch(ctx):
         if char not in good_chars:
             pretty_list = str(pretty_list).replace(char, ' ')
     await ctx.send(pretty_list)
+    
 
 # access current number of Project Euler problems
 link = 'https://projecteuler.net/archives'
