@@ -1,23 +1,23 @@
-from discord.utils import get
-import json
 import random
+from time import sleep
+
 import discord
 import requests
-
-from discord.ext import commands
 from bs4 import BeautifulSoup
-from time import sleep
+from discord.ext import commands
+from discord.utils import get
 
 reputation_count_tracker = {}
 
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
-bot = commands.Bot(command_prefix=',')
+bot = commands.Bot(command_prefix='.')
 
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game(name=". for commands"))
     for guild in bot.guilds:
 
         tempdict = {}
@@ -33,11 +33,36 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     reputation_count_tracker[message.guild.id][message.author.name] += 1
-
     await bot.process_commands(message)
 
 
-@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
+'''Gets the GitHub first <amount> repositories without embeds'''
+@bot.command(name='github')
+async def github(ctx, amount: int = 10):
+    page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
+    response = [f"{entry['description']}: {'<' + entry['url'] + '>'}\n" for entry in page.json()[:amount]]
+    embed = discord.Embed(title=f"**GitHub's top {str(amount)} today**", description='\n'.join(response), color=0x00ff00)
+    await ctx.send(embed=embed)
+
+
+@bot.command(name='eval', help='evaluates a math-expression')
+async def eval_command(ctx, expression: str = 'Content not set'):
+    output = eval(expression)
+    embed = discord.Embed(title="Output", description=f'*{expression}* = **{output}**', color=0x00ff00)
+    await ctx.send(embed=embed)
+
+
+@bot.command(name='roll_dice', brief='See top GitHub repos', help='Simulates rolling dice.')
+async def roll(ctx, number_of_dice: int, number_of_sides: int):
+    dice = [
+        str(random.choice(range(1, number_of_sides + 1)))
+        for _ in range(number_of_dice)
+    ]
+    await ctx.send(', '.join(dice))
+
+
+@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!',
+             description='Run a timer for x minutes and be alerted when your time is up.')
 async def timer(ctx, minutes=0.5):
     try:
         int(minutes)
@@ -47,7 +72,7 @@ async def timer(ctx, minutes=0.5):
         await ctx.send(embed=embed)
 
         time = minutes * 60
-        for x in range(time):
+        for x in range(int(time)):
             while time > 0:
                 time -= 1
                 sleep(1)
@@ -83,23 +108,7 @@ async def leave(ctx):
         await server.disconnect()
 
 
-@bot.command(name='github', brief='See top GitHub repos', description='Return the top daily GitHub repos!')
-async def fetch(ctx):
-    page = requests.get(
-        'https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
-    jsonpage = json.loads(page.content)
-    pretty_list = []
-    lst = ([(repo["name"], repo["author"]) for repo in jsonpage])
-    good_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz '
-    for ele in lst:
-        ele = ' '.join(ele[i] for i in range(len(ele)))
-        pretty_list.append(ele)
-    for char in str(pretty_list):
-        if char not in good_chars:
-            pretty_list = str(pretty_list).replace(char, ' ')
-    await ctx.send(pretty_list)
-
-
+# TODO put this inside the function or some class it belongs to
 # access current number of Project Euler problems
 link = 'https://projecteuler.net/archives'
 page = requests.get(link).content
@@ -110,8 +119,9 @@ lst[0] = lst[0].split(" ")
 num_problems = int(lst[0][1])
 
 
-@bot.command(name='euler', brief='Get specific or random Project Euler problem', description='Sends the user a specific or random Project Euler challenge')
-async def find_problem(ctx, number=random.randint(0, num_problems+1)):
+@bot.command(name='euler', brief='Get specific or random Project Euler problem',
+             description='Sends the user a specific or random Project Euler challenge')
+async def find_problem(ctx, number=random.randint(0, num_problems + 1)):
     link = f'https://projecteuler.net/problem={number}'
     page = requests.get(link).content
     soup = BeautifulSoup(page, 'html.parser')
@@ -120,7 +130,8 @@ async def find_problem(ctx, number=random.randint(0, num_problems+1)):
 
     if len(problem_content) < 1024:  # fits in embed
         embed = discord.Embed(
-            title=problem_number, description='The Project Euler problem that you requested. Have fun programming!', color=0x00ff00)
+            title=problem_number, description='The Project Euler problem that you requested. Have fun programming!',
+            color=0x00ff00)
 
         embed.add_field(name="Problem Content",
                         value=f'{problem_content}', inline=False)
@@ -132,7 +143,6 @@ async def find_problem(ctx, number=random.randint(0, num_problems+1)):
 
 @bot.command(name='reputation')
 async def reputation(ctx):
-
     member = ctx.author.name
     await ctx.send("Member {} \nReputation {}".format(member, reputation_count_tracker[ctx.guild.id][member]))
 
