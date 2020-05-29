@@ -1,6 +1,7 @@
+from discord.utils import get
 import json
 import random
-import discord  # required for pretty imbeds
+import discord
 import requests
 
 from discord.ext import commands
@@ -33,28 +34,53 @@ async def on_ready():
 async def on_message(message):
     reputation_count_tracker[message.guild.id][message.author.name] += 1
 
-    # if you delete this line, the bot will break!!
     await bot.process_commands(message)
 
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=1):
-    embed = discord.Embed(
-        title="Timer", description=f'Timer for {minutes} minutes has started!', color=0x00ff00)
+async def timer(ctx, minutes=0.5):
+    try:
+        int(minutes)
+        embed = discord.Embed(
+            title="Timer", description=f'Timer for {minutes} minutes has started!', color=0x00ff00)
 
-    await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
-    time = minutes * 60
-    for x in range(time):
-        while time > 0:
-            time -= 1
-            sleep(1)
-        if time == 0:
-            embed = discord.Embed(title="Time's Up!", description=f'Your timer has finished!', color = 0x00ff00)
-            await ctx.send(embed=embed)
-            
-            ### TODO add reactions thumbsup and thumbsdown
-            ### TODO check if user reacted to emojis
+        time = minutes * 60
+        for x in range(time):
+            while time > 0:
+                time -= 1
+                sleep(1)
+            if time == 0:
+                embed = discord.Embed(
+                    title="Time's Up!", description=f'Your timer has finished!', color=0x00ff00)
+                await ctx.send(embed=embed)
+
+            # TODO add reactions thumbsup and thumbsdown
+            # TODO check if user reacted to emojis
+    except ValueError:
+        embed = discord.Embed(title='Invalid Time Set')
+        await ctx.send(embed=embed)
+
+
+@bot.command()
+async def join(ctx):
+    try:
+        channel = ctx.message.author.voice.channel
+        voice = get(bot.voice_clients, guild=ctx.guild)
+        if voice and voice.is_connected():
+            await voice.move_to(channel)
+        else:
+            await channel.connect()
+    except AttributeError:
+        await ctx.send(f'You are not in a voice channel.')
+
+
+@bot.command(pass_context=True)
+async def leave(ctx):
+    if ctx.message.author.voice:
+        server = ctx.message.guild.voice_client
+        await server.disconnect()
 
 
 @bot.command(name='github', brief='See top GitHub repos', description='Return the top daily GitHub repos!')
@@ -72,6 +98,7 @@ async def fetch(ctx):
         if char not in good_chars:
             pretty_list = str(pretty_list).replace(char, ' ')
     await ctx.send(pretty_list)
+
 
 # access current number of Project Euler problems
 link = 'https://projecteuler.net/archives'
