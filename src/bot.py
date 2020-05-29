@@ -58,19 +58,12 @@ async def timer(ctx, minutes):
         await ctx.send(f'Invalid time set.')
 
 
+'''Gets the GitHub first <amount> repositories without embeds'''
 @bot.command(name='github')
-async def fetch(ctx):
+async def fetch(ctx, amount: int = 10):
     page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
-    jsonpage = json.loads(page.content)
-    pretty_list = []
-    lst = ([(repo["name"], repo["author"]) for repo in jsonpage])
-    good_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz '
-    for ele in lst:
-        ele = ' '.join(ele[i] for i in range(len(ele)))
-        pretty_list.append(ele)
-    for char in str(pretty_list):
-        if char not in good_chars: pretty_list = str(pretty_list).replace(char, ' ')
-    await ctx.send(pretty_list)
+    response = [f"{entry['description']}: {'<'+entry['url']+'>'}\n" for entry in page.json()[:amount]]
+    await ctx.send(f"**GitHub's top {str(amount)} today**:\n" + '\n'.join(response))
 
 
 @bot.command(name='eval')
