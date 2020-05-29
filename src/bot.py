@@ -39,16 +39,22 @@ async def on_message(message):
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
 async def timer(ctx, minutes=1):
-    await ctx.send(f'Timer for {minutes} minutes has started!')
+    embed = discord.Embed(
+        title="Timer", description=f'Timer for {minutes} minutes has started!', color=0x00ff00)
+
+    await ctx.send(embed=embed)
+
     time = minutes * 60
     for x in range(time):
         while time > 0:
             time -= 1
             sleep(1)
         if time == 0:
-            await ctx.send('\n\nTimes up!!!\nContinue?')
-            # add reactions thumbsup and thumbsdown
-            # check if user reacted to emojis
+            embed = discord.Embed(title="Time's Up!", description=f'Your timer has finished!', color = 0x00ff00)
+            await ctx.send(embed=embed)
+            
+            ### TODO add reactions thumbsup and thumbsdown
+            ### TODO check if user reacted to emojis
 
 
 @bot.command(name='github', brief='See top GitHub repos', description='Return the top daily GitHub repos!')
