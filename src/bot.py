@@ -1,6 +1,5 @@
 import json
 import random
-import winsound
 from time import sleep
 
 import requests
@@ -52,10 +51,8 @@ async def timer(ctx, minutes):
             while time > 0:
                 time -= 1
                 sleep(1)
-                print(time)
             if time == 0:
                 await ctx.send('Times up!!!')
-                winsound.Beep(400, 200)  # A short beep to show that the timer ended
                 break
     except ValueError:
         await ctx.send(f'Invalid time set.')
