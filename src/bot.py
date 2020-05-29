@@ -1,10 +1,10 @@
 import json
 import random
-import winsound
 from time import sleep
 
 import requests
 from discord.ext import commands
+from discord.utils import get
 
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
@@ -21,19 +21,41 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.send(', '.join(dice))
 
 
+@bot.command()
+async def join(ctx):
+    try:
+        channel = ctx.message.author.voice.channel
+        voice = get(bot.voice_clients, guild=ctx.guild)
+        if voice and voice.is_connected():
+            await voice.move_to(channel)
+        else:
+            await channel.connect()
+    except AttributeError:
+        await ctx.send(f'You are not in a voice channel.')
+
+
+@bot.command(pass_context=True)
+async def leave(ctx):
+    if ctx.message.author.voice:
+        server = ctx.message.guild.voice_client
+        await server.disconnect()
+
+
 @bot.command(name='timer')
-async def timer(ctx, minutes=25):
-    await ctx.send(f'Timer for {minutes} minutes has started!')
-    time = minutes * 60
-    for x in range(time):
-        while time > 0:
-            time -= 1
-            sleep(1)
-            print(time)
-        if time == 0:
-            await ctx.send('Times up!!!')
-            winsound.Beep(400, 200)  # A short beep to show that the timer ended
-            break
+async def timer(ctx, minutes):
+    try:
+        int(minutes)
+        await ctx.send(f'Timer for {minutes} minutes has started!')
+        time = int(minutes) * 60
+        for x in range(time):
+            while time > 0:
+                time -= 1
+                sleep(1)
+            if time == 0:
+                await ctx.send('Times up!!!')
+                break
+    except ValueError:
+        await ctx.send(f'Invalid time set.')
 
 
 @bot.command(name='github')
