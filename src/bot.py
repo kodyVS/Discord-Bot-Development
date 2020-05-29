@@ -1,6 +1,6 @@
 import json
 import random
-import discord  # required for pretty imbeds
+import discord
 import requests
 
 from discord.ext import commands
@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from time import sleep
 
 reputation_count_tracker = {}
+from discord.utils import get
 
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
@@ -33,22 +34,43 @@ async def on_ready():
 async def on_message(message):
     reputation_count_tracker[message.guild.id][message.author.name] += 1
 
-    # if you delete this line, the bot will break!!
     await bot.process_commands(message)
 
+@bot.command()
+async def join(ctx):
+    try:
+        channel = ctx.message.author.voice.channel
+        voice = get(bot.voice_clients, guild=ctx.guild)
+        if voice and voice.is_connected():
+            await voice.move_to(channel)
+        else:
+            await channel.connect()
+    except AttributeError:
+        await ctx.send(f'You are not in a voice channel.')
 
-@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=1):
-    await ctx.send(f'Timer for {minutes} minutes has started!')
-    time = minutes * 60
-    for x in range(time):
-        while time > 0:
-            time -= 1
-            sleep(1)
-        if time == 0:
-            await ctx.send('\n\nTimes up!!!\nContinue?')
-            # add reactions thumbsup and thumbsdown
-            # check if user reacted to emojis
+
+@bot.command(pass_context=True)
+async def leave(ctx):
+    if ctx.message.author.voice:
+        server = ctx.message.guild.voice_client
+        await server.disconnect()
+
+
+@bot.command(name='timer')
+async def timer(ctx, minutes):
+    try:
+        int(minutes)
+        await ctx.send(f'Timer for {minutes} minutes has started!')
+        time = int(minutes) * 60
+        for x in range(time):
+            while time > 0:
+                time -= 1
+                sleep(1)
+            if time == 0:
+                await ctx.send('Times up!!!')
+                break
+    except ValueError:
+        await ctx.send(f'Invalid time set.')
 
 
 @bot.command(name='github', brief='See top GitHub repos', description='Return the top daily GitHub repos!')
