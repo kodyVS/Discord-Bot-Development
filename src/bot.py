@@ -7,10 +7,34 @@ from discord.ext import commands
 from bs4 import BeautifulSoup
 from time import sleep
 
+reputation_count_tracker = {}
+
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
 bot = commands.Bot(command_prefix=',')
+
+
+@bot.event
+async def on_ready():
+    for guild in bot.guilds:
+
+        tempdict = {}
+        for member in guild.members:
+            tempdict[member.name] = 0
+
+        reputation_count_tracker[guild.id] = tempdict.copy()
+        tempdict = tempdict.clear()
+
+    print("PGbot is ready!")
+
+
+@bot.event
+async def on_message(message):
+    reputation_count_tracker[message.guild.id][message.author.name] += 1
+
+    # if you delete this line, the bot will break!!
+    await bot.process_commands(message)
 
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
@@ -73,4 +97,11 @@ async def find_problem(ctx, number=random.randint(0, num_problems+1)):
         await ctx.send(f'{problem_number}\n\n{problem_content}')
 
 
-bot.run(TOKEN)  # way2
+@bot.command(name='reputation')
+async def reputation(ctx):
+
+    member = ctx.author.name
+    await ctx.send("Member {} \nReputation {}".format(member, reputation_count_tracker[ctx.guild.id][member]))
+
+
+bot.run(TOKEN)
