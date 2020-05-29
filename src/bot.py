@@ -12,7 +12,7 @@ reputation_count_tracker = {}
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
-bot = commands.Bot(command_prefix=',')
+bot = commands.Bot(command_prefix='.')
 
 
 @bot.event
