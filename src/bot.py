@@ -3,6 +3,7 @@ from time import sleep
 
 import discord
 import requests
+import math
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from discord.utils import get
