@@ -3,6 +3,7 @@ from time import sleep
 
 import discord
 import requests
+import math
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from discord.utils import get
@@ -52,7 +53,7 @@ async def eval_command(ctx, expression: str = 'Content not set'):
     await ctx.send(embed=embed)
 
 
-@bot.command(name='roll_dice', brief='See top GitHub repos', help='Simulates rolling dice.')
+@bot.command(name='roll_dice', brief='Rolls some dice', help='Simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
     dice = [
         str(random.choice(range(1, number_of_sides + 1)))
@@ -61,28 +62,35 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.send(', '.join(dice))
 
 
-@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!',
-             description='Run a timer for x minutes and be alerted when your time is up.')
+@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
 async def timer(ctx, minutes=0.5):
     try:
-        int(minutes)
+        float(minutes) or int(minutes)
         embed = discord.Embed(
             title="Timer", description=f'Timer for {minutes} minutes has started!', color=0x00ff00)
 
-        await ctx.send(embed=embed)
+        msg = await ctx.send(embed=embed)
 
         time = minutes * 60
         for x in range(int(time)):
             while time > 0:
                 time -= 1
                 sleep(1)
+                newEmbed = discord.Embed(
+                    title="Timer", description=f'Time: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
+
+                await msg.edit(embed=newEmbed)
+
             if time == 0:
                 embed = discord.Embed(
-                    title="Time's Up!", description=f'Your timer has finished!', color=0x00ff00)
+                    title="Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!', color=0x00ff00)
+
                 await ctx.send(embed=embed)
 
             # TODO add reactions thumbsup and thumbsdown
             # TODO check if user reacted to emojis
+            # TODO updating timer
+
     except ValueError:
         embed = discord.Embed(title='Invalid Time Set')
         await ctx.send(embed=embed)
@@ -121,7 +129,10 @@ num_problems = int(lst[0][1])
 
 @bot.command(name='euler', brief='Get specific or random Project Euler problem',
              description='Sends the user a specific or random Project Euler challenge')
-async def find_problem(ctx, number=random.randint(0, num_problems + 1)):
+async def find_problem(ctx, number: int = -99):
+    if number == -99:
+        number = random.randint(1, num_problems+1)
+                
     link = f'https://projecteuler.net/problem={number}'
     page = requests.get(link).content
     soup = BeautifulSoup(page, 'html.parser')
