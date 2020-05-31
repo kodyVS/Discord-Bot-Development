@@ -121,10 +121,11 @@ async def leave(ctx):
 link = 'https://projecteuler.net/archives'
 page = requests.get(link).content
 soup = BeautifulSoup(page, 'html.parser')
-lst = list(soup.select('li'))
+lst = list(soup.select('p'))
 lst[0] = str(lst[0])
 lst[0] = lst[0].split(" ")
-num_problems = int(lst[0][1])
+lst[0][8] = lst[0][8][:-1]
+num_problems = int(lst[0][8])+10
 
 
 @bot.command(name='euler', brief='Get specific or random Project Euler problem',
