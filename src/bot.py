@@ -16,6 +16,7 @@ with open("DISCORD_TOKEN.txt", "r") as code:
 
 bot = commands.Bot(command_prefix='.')
 
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game(name=". for commands"))
@@ -40,16 +41,20 @@ async def on_message(message):
 '''Gets the GitHub first <amount> repositories without embeds'''
 @bot.command(name='github')
 async def github(ctx, amount: int = 10):
-    page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
-    response = [f"{entry['description']}: {'<' + entry['url'] + '>'}\n" for entry in page.json()[:amount]]
-    embed = discord.Embed(title=f"**GitHub's top {str(amount)} today**", description='\n'.join(response), color=0x00ff00)
+    page = requests.get(
+        'https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
+    response = [
+        f"{entry['description']}: {'<' + entry['url'] + '>'}\n" for entry in page.json()[:amount]]
+    embed = discord.Embed(
+        title=f"**GitHub's top {str(amount)} today**", description='\n'.join(response), color=0x00ff00)
     await ctx.send(embed=embed)
 
 
 @bot.command(name='eval', help='evaluates a math-expression')
 async def eval_command(ctx, expression: str = 'Content not set'):
     output = eval(expression)
-    embed = discord.Embed(title="Output", description=f'*{expression}* = **{output}**', color=0x00ff00)
+    embed = discord.Embed(
+        title="Output", description=f'*{expression}* = **{output}**', color=0x00ff00)
     await ctx.send(embed=embed)
 
 
@@ -63,30 +68,26 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=0.5, pause = 0.1):
+async def timer(ctx, minutes=25, pause=5):
     try:
         float(minutes) or int(minutes)
 
         is_work = True
         time = minutes * 60
         embed = discord.Embed(
-            title="Timer", description=f'Timer for {math.floor(time/60)} minutes and {int(time%60)} seconds has started.', color=0x00ff00)
+            title="Timer", description=f'Timer set for {math.floor(time/60)} minutes and {int(time%60)} seconds.', color=0x00ff00)
 
-        msg = await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
+        await asyncio.sleep(5)
 
         for x in range(int(time)):
             while time > 0:
-                time -= 1
-                sleep(1) # will stop bot though, need alternative
-
-                if is_work:
-                    newEmbed = discord.Embed(
-                        title="Work Time", description=f'Work Time Left: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
+                if time > 60:
+                    time -= 60
+                    await asyncio.sleep(60)
                 else:
-                    newEmbed = discord.Embed(
-                        title="Break Time", description=f'Break Time Left: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
-
-                await msg.edit(embed=newEmbed)
+                    await asyncio.sleep(time)
+                    time = 0
 
             if time == 0:
                 if is_work:
@@ -97,7 +98,7 @@ async def timer(ctx, minutes=0.5, pause = 0.1):
                         title="Work Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nContinue?', color=0x00ff00)
 
                 else:
-                    time -= 1 # prevent infinite looping
+                    time -= 1  # prevent infinite looping
                     embed = discord.Embed(
                         title="Break Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nContinue?', color=0x00ff00)
 
@@ -112,9 +113,9 @@ async def timer(ctx, minutes=0.5, pause = 0.1):
                     def check(reaction, user):
                         return user == ctx.author and str(reaction.emoji) == thumbsup
 
-                    await bot.wait_for('reaction_add', timeout=5.0, check=check) # 5 seconds to check for reaction from user
-                    print(await timer(ctx, minutes = minutes))
-
+                    # 10 seconds to check for reaction from user
+                    await bot.wait_for('reaction_add', timeout=10.0, check=check)
+                    print(await timer(ctx, minutes=minutes))
 
 
             # TODO check if user reacted to emojis
@@ -161,7 +162,7 @@ num_problems = int(lst[0][8])+10
 async def find_problem(ctx, number: int = -99):
     if number == -99:
         number = random.randint(1, num_problems+1)
-                
+
     link = f'https://projecteuler.net/problem={number}'
     page = requests.get(link).content
     soup = BeautifulSoup(page, 'html.parser')
