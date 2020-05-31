@@ -68,7 +68,7 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=25, pause=5):
+async def timer(ctx, minutes=25, pause = 5):
     try:
         float(minutes) or int(minutes)
 
