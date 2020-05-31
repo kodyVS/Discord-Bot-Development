@@ -68,17 +68,13 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=25, pause = 5):
+async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
     try:
-        float(minutes) or int(minutes)
-
         is_work = True
         time = minutes * 60
         embed = discord.Embed(
-            title="Timer", description=f'Timer set for {math.floor(time/60)} minutes and {int(time%60)} seconds.', color=0x00ff00)
-
+            title="Timer", description=f'Timer set for {math.floor(time/60)} minutes and {int(float(time%60))} seconds.', color=0x00ff00)
         await ctx.send(embed=embed)
-        await asyncio.sleep(5)
 
         for x in range(int(time)):
             while time > 0:
@@ -95,12 +91,14 @@ async def timer(ctx, minutes=25, pause = 5):
                     is_work = False
 
                     embed = discord.Embed(
-                        title="Work Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nContinue?', color=0x00ff00)
+                        title="Work Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished! Stop working, it is break time now!', color=0x00ff00)
+
+                    message = await ctx.send(embed=embed)
 
                 else:
                     time -= 1  # prevent infinite looping
                     embed = discord.Embed(
-                        title="Break Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nContinue?', color=0x00ff00)
+                        title="Break Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nNew timer?', color=0x00ff00)
 
                     thumbsup = '\N{THUMBS UP SIGN}'
                     thumbsdown = '\N{THUMBS DOWN SIGN}'
@@ -116,7 +114,6 @@ async def timer(ctx, minutes=25, pause = 5):
                     # 10 seconds to check for reaction from user
                     await bot.wait_for('reaction_add', timeout=10.0, check=check)
                     print(await timer(ctx, minutes=minutes))
-
 
             # TODO check if user reacted to emojis
 
