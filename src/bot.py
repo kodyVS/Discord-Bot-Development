@@ -1,9 +1,10 @@
 import random
-from time import sleep
-
 import discord
 import requests
 import math
+import asyncio
+
+from time import sleep
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from discord.utils import get
@@ -14,7 +15,6 @@ with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
 bot = commands.Bot(command_prefix='.')
-
 
 @bot.event
 async def on_ready():
@@ -63,33 +63,61 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 
 @bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=0.5):
+async def timer(ctx, minutes=0.5, pause = 0.1):
     try:
         float(minutes) or int(minutes)
+
+        is_work = True
+        time = minutes * 60
         embed = discord.Embed(
-            title="Timer", description=f'Timer for {minutes} minutes has started!', color=0x00ff00)
+            title="Timer", description=f'Timer for {math.floor(time/60)} minutes and {int(time%60)} seconds has started.', color=0x00ff00)
 
         msg = await ctx.send(embed=embed)
 
-        time = minutes * 60
         for x in range(int(time)):
             while time > 0:
                 time -= 1
-                sleep(1)
-                newEmbed = discord.Embed(
-                    title="Timer", description=f'Time: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
+                sleep(1) # will stop bot though, need alternative
+
+                if is_work:
+                    newEmbed = discord.Embed(
+                        title="Work Time", description=f'Work Time Left: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
+                else:
+                    newEmbed = discord.Embed(
+                        title="Break Time", description=f'Break Time Left: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
 
                 await msg.edit(embed=newEmbed)
 
             if time == 0:
-                embed = discord.Embed(
-                    title="Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!', color=0x00ff00)
+                if is_work:
+                    time = pause*60
+                    is_work = False
 
-                await ctx.send(embed=embed)
+                    embed = discord.Embed(
+                        title="Work Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nContinue?', color=0x00ff00)
 
-            # TODO add reactions thumbsup and thumbsdown
+                else:
+                    time -= 1 # prevent infinite looping
+                    embed = discord.Embed(
+                        title="Break Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nContinue?', color=0x00ff00)
+
+                    thumbsup = '\N{THUMBS UP SIGN}'
+                    thumbsdown = '\N{THUMBS DOWN SIGN}'
+
+                    message = await ctx.send(embed=embed)
+
+                    await message.add_reaction(thumbsup)
+                    await message.add_reaction(thumbsdown)
+
+                    def check(reaction, user):
+                        return user == ctx.author and str(reaction.emoji) == thumbsup
+
+                    await bot.wait_for('reaction_add', timeout=5.0, check=check) # 5 seconds to check for reaction from user
+                    print(await timer(ctx, minutes = minutes))
+
+
+
             # TODO check if user reacted to emojis
-            # TODO updating timer
 
     except ValueError:
         embed = discord.Embed(title='Invalid Time Set')
