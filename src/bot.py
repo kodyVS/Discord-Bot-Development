@@ -216,9 +216,9 @@ async def docs(ctx, language: str, query):
 
 
 @bot.command(name = 'run', aliases = ['evaluate', 'execute'], brief='Runs code in 600+ languages', description = '.run <language> <code>')
-async def execute_code(ctx, lang: str, query: str, inputs: str = ''):
+async def execute_code(ctx, lang: str, query: str):
     site = Tio()
-    request = site.new_request(lang, query, inputs = inputs)
+    request = site.new_request(lang, query)
 
     embed = discord.Embed(title = f'{lang} code evaluation', color = 0x00f00, description = 'WITH TIO.RUN')
     embed.add_field(name = '**Result**', value = site.send(request))
