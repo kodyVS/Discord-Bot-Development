@@ -1,9 +1,10 @@
 import random
-from time import sleep
-
 import discord
 import requests
 import math
+import asyncio
+
+from time import sleep
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from discord.utils import get
@@ -13,7 +14,7 @@ reputation_count_tracker = {}
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
-bot = commands.Bot(command_prefix='.')
+bot = commands.Bot(command_prefix='.', case_insensitive = True)
 
 
 @bot.event
@@ -37,19 +38,23 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-'''Gets the GitHub first <amount> repositories without embeds'''
 @bot.command(name='github')
 async def github(ctx, amount: int = 10):
-    page = requests.get('https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
-    response = [f"{entry['description']}: {'<' + entry['url'] + '>'}\n" for entry in page.json()[:amount]]
-    embed = discord.Embed(title=f"**GitHub's top {str(amount)} today**", description='\n'.join(response), color=0x00ff00)
+    '''Gets the GitHub first < amount > repositories without embeds'''
+    page = requests.get(
+        'https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
+    response = [
+        f"{entry['description']}: {'<' + entry['url'] + '>'}\n" for entry in page.json()[:amount]]
+    embed = discord.Embed(
+        title=f"**GitHub's top {str(amount)} today**", description='\n'.join(response), color=0x00ff00)
     await ctx.send(embed=embed)
 
 
 @bot.command(name='eval', help='evaluates a math-expression')
 async def eval_command(ctx, expression: str = 'Content not set'):
     output = eval(expression)
-    embed = discord.Embed(title="Output", description=f'*{expression}* = **{output}**', color=0x00ff00)
+    embed = discord.Embed(
+        title="Output", description=f'*{expression}* = **{output}**', color=0x00ff00)
     await ctx.send(embed=embed)
 
 
@@ -62,34 +67,53 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.send(', '.join(dice))
 
 
-@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
-async def timer(ctx, minutes=0.5):
+@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.', aliases = ['pomodoro', 'stopwatch'])
+async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
     try:
-        float(minutes) or int(minutes)
-        embed = discord.Embed(
-            title="Timer", description=f'Timer for {minutes} minutes has started!', color=0x00ff00)
-
-        msg = await ctx.send(embed=embed)
-
+        is_work = True
         time = minutes * 60
+        embed = discord.Embed(
+            title="Timer", description=f'Timer set for {math.floor(time/60)} minutes and {int(float(time%60))} seconds.', color=0x00ff00)
+        await ctx.send(embed=embed)
+
         for x in range(int(time)):
             while time > 0:
-                time -= 1
-                sleep(1)
-                newEmbed = discord.Embed(
-                    title="Timer", description=f'Time: {math.floor(time/60)} minutes and {int(time%60)} seconds!', color=0x00ff00)
-
-                await msg.edit(embed=newEmbed)
+                if time > 60:
+                    time -= 60
+                    await asyncio.sleep(60)
+                else:
+                    await asyncio.sleep(time)
+                    time = 0
 
             if time == 0:
-                embed = discord.Embed(
-                    title="Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!', color=0x00ff00)
+                if is_work:
+                    time = pause*60
+                    is_work = False
 
-                await ctx.send(embed=embed)
+                    embed = discord.Embed(
+                        title="Work Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished! Stop working, it is break time now!', color=0x00ff00)
 
-            # TODO add reactions thumbsup and thumbsdown
-            # TODO check if user reacted to emojis
-            # TODO updating timer
+                    message = await ctx.send(embed=embed)
+
+                else:
+                    time -= 1  # prevent infinite looping
+                    embed = discord.Embed(
+                        title="Break Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nNew timer?', color=0x00ff00)
+
+                    thumbsup = '\N{THUMBS UP SIGN}'
+                    thumbsdown = '\N{THUMBS DOWN SIGN}'
+
+                    message = await ctx.send(embed=embed)
+
+                    await message.add_reaction(thumbsup)
+                    await message.add_reaction(thumbsdown)
+
+                    def check(reaction, user):
+                        return user == ctx.author and str(reaction.emoji) == thumbsup
+
+                    # 10 seconds to check for reaction from user
+                    await bot.wait_for('reaction_add', timeout=10.0, check=check)
+                    print(await timer(ctx, minutes=minutes))
 
     except ValueError:
         embed = discord.Embed(title='Invalid Time Set')
@@ -133,7 +157,7 @@ num_problems = int(lst[0][8])+10
 async def find_problem(ctx, number: int = -99):
     if number == -99:
         number = random.randint(1, num_problems+1)
-                
+
     link = f'https://projecteuler.net/problem={number}'
     page = requests.get(link).content
     soup = BeautifulSoup(page, 'html.parser')
@@ -157,6 +181,37 @@ async def find_problem(ctx, number: int = -99):
 async def reputation(ctx):
     member = ctx.author.name
     await ctx.send("Member {} \nReputation {}".format(member, reputation_count_tracker[ctx.guild.id][member]))
+
+
+@bot.command(name = 'docs', aliases = ['documentation', 'info'])
+async def docs(ctx, language: str, query):
+    # access docs based on language
+
+    if language == 'python' or language == 'python3':
+        full_link = 'https://docs.python.org/3/genindex-all.html'
+        page = requests.get(full_link).content
+        soup = BeautifulSoup(page, 'html.parser')
+
+        link_descriptions = []
+
+        for link in soup.findAll('a'):
+            if query in link.contents[0]:
+                link_descriptions.append(f"[{link.contents[0]}](https://docs.python.org/3/{link['href']})")
+
+        link_descriptions = list(dict.fromkeys(link_descriptions))
+        link_descriptions = link_descriptions[:10]
+
+        ### TODO: multi-lingual docs support (devdocs.io?)
+        ### TODO: faster searching (current 4-5 secs)
+        ### TODO: filter results -> currently only pick top ten, and there are some odd results as well
+
+        embed = discord.Embed(title="Python 3 Docs", color = 0x00ff00)
+        embed.add_field(name=f'{len(link_descriptions)} results found for `{query}` :', value='\n'.join(
+            link_descriptions), inline=False)
+        embed.set_thumbnail(url=
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/240px-Python-logo-notext.svg.png')
+
+        await ctx.send(embed=embed)
 
 
 bot.run(TOKEN)
