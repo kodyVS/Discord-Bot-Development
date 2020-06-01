@@ -3,6 +3,7 @@ import discord
 import requests
 import math
 import asyncio
+import os
 
 from grab_tio import Tio
 from time import sleep
