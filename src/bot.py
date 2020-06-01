@@ -14,7 +14,7 @@ reputation_count_tracker = {}
 with open("DISCORD_TOKEN.txt", "r") as code:
     TOKEN = code.readlines()[0]
 
-bot = commands.Bot(command_prefix='.')
+bot = commands.Bot(command_prefix='.', case_insensitive = True)
 
 
 @bot.event
@@ -38,9 +38,9 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-'''Gets the GitHub first <amount> repositories without embeds'''
 @bot.command(name='github')
 async def github(ctx, amount: int = 10):
+    '''Gets the GitHub first < amount > repositories without embeds'''
     page = requests.get(
         'https://github-trending-api.now.sh/repositories?q=sort=stars&order=desc&since=daily')
     response = [
@@ -115,8 +115,6 @@ async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
                     await bot.wait_for('reaction_add', timeout=10.0, check=check)
                     print(await timer(ctx, minutes=minutes))
 
-            # TODO check if user reacted to emojis
-
     except ValueError:
         embed = discord.Embed(title='Invalid Time Set')
         await ctx.send(embed=embed)
@@ -183,6 +181,37 @@ async def find_problem(ctx, number: int = -99):
 async def reputation(ctx):
     member = ctx.author.name
     await ctx.send("Member {} \nReputation {}".format(member, reputation_count_tracker[ctx.guild.id][member]))
+
+
+@bot.command(name = 'docs', aliases = ['documentation', 'info'])
+async def docs(ctx, language: str, query):
+    # access docs based on language
+
+    if language == 'python' or language == 'python3':
+        full_link = 'https://docs.python.org/3/genindex-all.html'
+        page = requests.get(full_link).content
+        soup = BeautifulSoup(page, 'html.parser')
+
+        link_descriptions = []
+
+        for link in soup.findAll('a'):
+            if query in link.contents[0]:
+                link_descriptions.append(f"[{link.contents[0]}](https://docs.python.org/3/{link['href']})")
+
+        link_descriptions = list(dict.fromkeys(link_descriptions))
+        link_descriptions = link_descriptions[:10]
+
+        ### TODO: multi-lingual docs support (devdocs.io?)
+        ### TODO: faster searching (current 4-5 secs)
+        ### TODO: filter results -> currently only pick top ten, and there are some odd results as well
+
+        embed = discord.Embed(title="Python 3 Docs", color = 0x00ff00)
+        embed.add_field(name=f'{len(link_descriptions)} results found for `{query}` :', value='\n'.join(
+            link_descriptions), inline=False)
+        embed.set_thumbnail(url=
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/240px-Python-logo-notext.svg.png')
+
+        await ctx.send(embed=embed)
 
 
 bot.run(TOKEN)
