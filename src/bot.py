@@ -12,8 +12,12 @@ from discord.utils import get
 
 reputation_count_tracker = {}
 
-with open("DISCORD_TOKEN.txt", "r") as code:
-    TOKEN = code.readlines()[0]
+try:
+    with open("DISCORD_TOKEN.txt", "r") as code:
+        TOKEN = code.readlines()[0]
+
+except:
+    TOKEN = os.environ.get('BOT_TOKEN')
 
 bot = commands.Bot(command_prefix='.', case_insensitive = True)
 
