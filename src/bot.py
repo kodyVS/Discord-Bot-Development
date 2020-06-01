@@ -67,7 +67,7 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.send(', '.join(dice))
 
 
-@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.')
+@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.', aliases = ['pomodoro', 'stopwatch'])
 async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
     try:
         is_work = True
