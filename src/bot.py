@@ -44,7 +44,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-@bot.command(name='github')
+@bot.command(name='github', brief = 'Fetch to <amount> GitHub repos', description = 'Print out an embedded list of the top daily GitHub repositories')
 async def github(ctx, amount: int = 10):
     '''Gets the GitHub first < amount > repositories without embeds'''
     page = requests.get(
@@ -56,7 +56,7 @@ async def github(ctx, amount: int = 10):
     await ctx.send(embed=embed)
 
 
-@bot.command(name='eval', help='evaluates a math-expression')
+@bot.command(name='eval', brief='Evaluates a math expression', description = 'Solves a mathematical expression')
 async def eval_command(ctx, expression: str = 'Content not set'):
     output = eval(expression)
     embed = discord.Embed(
@@ -64,7 +64,7 @@ async def eval_command(ctx, expression: str = 'Content not set'):
     await ctx.send(embed=embed)
 
 
-@bot.command(name='roll_dice', brief='Rolls some dice', help='Simulates rolling dice.')
+@bot.command(name='roll_dice', brief='Rolls some dice', description='Simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
     dice = [
         str(random.choice(range(1, number_of_sides + 1)))
@@ -131,7 +131,7 @@ async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
         await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command(name = 'join', brief = 'Bot joins channel and beeps', description = 'Used only for the .timer function, causes bot to join and make beeping sound.')
 async def join(ctx):
     try:
         channel = ctx.message.author.voice.channel
@@ -153,7 +153,7 @@ async def join(ctx):
         await ctx.send(f'You are not in a voice channel.')
 
 
-@bot.command(pass_context=True)
+@bot.command(pass_context=True, name = 'leave', brief = 'Causes bot to leave current voice channel')
 async def leave(ctx):
     if ctx.message.author.voice:
         server = ctx.message.guild.voice_client
@@ -190,7 +190,10 @@ async def find_problem(ctx, number: int = -99):
             color=0x00ff00)
 
         embed.add_field(name="Problem Content",
-                        value=f'{problem_content}', inline=False)
+                        value=f'{problem_content}', inline=True)
+        embed.add_field(name='Link', value = f'[Link to the problem]({link})', inline = True)
+        embed.set_image(
+            url = 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Leonhard_Euler.jpg', )
         await ctx.send(embed=embed)
 
     else:
