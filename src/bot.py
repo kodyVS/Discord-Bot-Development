@@ -18,7 +18,11 @@ try:
 except:
     TOKEN = os.environ.get('BOT_TOKEN')
 
-bot = commands.Bot(command_prefix='.', case_insensitive = True)
+bot = commands.Bot(command_prefix='.', case_insensitive=True)
+
+# order is important, as VoiceCog needs to be initialised first to be passed on to the TimerCog e.g.
+bot.add_cog(VoiceCog(bot))
+bot.add_cog(TimerCog(bot))
 
 bot.add_cog(ChallengeCog(bot))
 bot.add_cog(DocScraperCog(bot))
@@ -26,8 +30,6 @@ bot.add_cog(GitHubCog(bot))
 bot.add_cog(MathCog(bot))
 bot.add_cog(ReputationCog(bot))
 bot.add_cog(TioCog(bot))
-bot.add_cog(TimerCog(bot))
-bot.add_cog(VoiceCog(bot))
 
 @bot.event
 async def on_ready():

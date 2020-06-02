@@ -3,10 +3,13 @@ import math
 import asyncio
 from discord.ext import commands
 
+from src.Cogs.VoiceCog import VoiceCog
 
 class TimerCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.voiceCog = bot.get_cog('VoiceCog')
+        print(self.voiceCog)
 
     @commands.command(name='timer', brief='Pomodoro-esque timer for productivity!',
                  description='Run a timer for x minutes and be alerted when your time is up.',
@@ -41,12 +44,17 @@ class TimerCog(commands.Cog):
                             color=0x00ff00)
 
                         message = await ctx.send(embed=embed)
+                        await self.voiceCog.join(ctx)
+                        await self.voiceCog.leave(ctx)
 
                     else:
                         time -= 1  # prevent infinite looping
                         embed = discord.Embed(
                             title="Break Time's Up!",
                             description=f'{ctx.author.mention}\nYour timer has finished!\nNew timer?', color=0x00ff00)
+
+                        await self.voiceCog.join(ctx)
+                        await self.voiceCog.leave(ctx)
 
                         thumbsup = '\N{THUMBS UP SIGN}'
                         thumbsdown = '\N{THUMBS DOWN SIGN}'
