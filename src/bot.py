@@ -3,6 +3,7 @@ import discord
 import requests
 import math
 import asyncio
+import os
 
 from grab_tio import Tio
 from time import sleep
@@ -19,7 +20,7 @@ try:
 except:
     TOKEN = os.environ.get('BOT_TOKEN')
 
-bot = commands.Bot(command_prefix='.', case_insensitive = True)
+bot = commands.Bot(command_prefix='.', case_insensitive=True)
 
 
 @bot.event
@@ -72,7 +73,7 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.send(', '.join(dice))
 
 
-@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.', aliases = ['pomodoro', 'stopwatch'])
+@bot.command(name='timer', brief='Pomodoro-esque timer for productivity!', description='Run a timer for x minutes and be alerted when your time is up.', aliases=['pomodoro', 'stopwatch'])
 async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
     try:
         is_work = True
@@ -99,11 +100,16 @@ async def timer(ctx, minutes: float = 25.0, pause: float = 5.0):
                         title="Work Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished! Stop working, it is break time now!', color=0x00ff00)
 
                     message = await ctx.send(embed=embed)
+                    await join(ctx)
+                    await leave(ctx)
 
                 else:
                     time -= 1  # prevent infinite looping
                     embed = discord.Embed(
                         title="Break Time's Up!", description=f'{ctx.author.mention}\nYour timer has finished!\nNew timer?', color=0x00ff00)
+
+                    await join(ctx)
+                    await leave(ctx)
 
                     thumbsup = '\N{THUMBS UP SIGN}'
                     thumbsdown = '\N{THUMBS DOWN SIGN}'
@@ -131,9 +137,18 @@ async def join(ctx):
         channel = ctx.message.author.voice.channel
         voice = get(bot.voice_clients, guild=ctx.guild)
         if voice and voice.is_connected():
-            await voice.move_to(channel)
+            spot = await voice.move_to(channel)
         else:
-            await channel.connect()
+            spot = await channel.connect()
+
+        spot.play(discord.FFmpegPCMAudio('timedone.mp3'))  # timer's up
+
+        counter = 0
+        duration = 8   # In seconds
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter = counter + 1
+
     except AttributeError:
         await ctx.send(f'You are not in a voice channel.')
 
@@ -188,7 +203,7 @@ async def reputation(ctx):
     await ctx.send("Member {} \nReputation {}".format(member, reputation_count_tracker[ctx.guild.id][member]))
 
 
-@bot.command(name = 'docs', aliases = ['documentation', 'info'])
+@bot.command(name='docs', aliases=['documentation', 'info'])
 async def docs(ctx, language: str, query):
     # access docs based on language
 
@@ -201,37 +216,39 @@ async def docs(ctx, language: str, query):
 
         for link in soup.findAll('a'):
             if query in link.contents[0]:
-                link_descriptions.append(f"[{link.contents[0]}](https://docs.python.org/3/{link['href']})")
+                link_descriptions.append(
+                    f"[{link.contents[0]}](https://docs.python.org/3/{link['href']})")
 
         link_descriptions = list(dict.fromkeys(link_descriptions))
         link_descriptions = link_descriptions[:10]
 
-        ### TODO: multi-lingual docs support (devdocs.io?)
-        ### TODO: faster searching (current 4-5 secs)
-        ### TODO: filter results -> currently only pick top ten, and there are some odd results as well
+        # TODO: multi-lingual docs support (devdocs.io?)
+        # TODO: faster searching (current 4-5 secs)
+        # TODO: filter results -> currently only pick top ten, and there are some odd results as well
 
-        embed = discord.Embed(title="Python 3 Docs", color = 0x00ff00)
+        embed = discord.Embed(title="Python 3 Docs", color=0x00ff00)
         embed.add_field(name=f'{len(link_descriptions)} results found for `{query}` :', value='\n'.join(
             link_descriptions), inline=False)
-        embed.set_thumbnail(url=
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/240px-Python-logo-notext.svg.png')
+        embed.set_thumbnail(
+            url='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/240px-Python-logo-notext.svg.png')
 
         await ctx.send(embed=embed)
 
 
-@bot.command(name = 'run', aliases = ['evaluate', 'execute'], brief='Runs code in 600+ languages', description = '.run <language> <code>')
+@bot.command(name='run', aliases=['evaluate', 'execute'], brief='Runs code in 600+ languages', description='.run <language> <code>')
 async def execute_code(ctx, lang: str, *args):
     query = " ".join(args[:])
-    
+
     site = Tio()
     request = site.new_request(lang, query)
 
-    embed = discord.Embed(title = f'{lang} code evaluation', color = 0x00f00, description = 'WITH TIO.RUN')
-    embed.add_field(name = '**Result**', value = site.send(request))
+    embed = discord.Embed(
+        title=f'{lang} code evaluation', color=0x00f00, description='WITH TIO.RUN')
+    embed.add_field(name='**Result**', value=site.send(request))
 
-    await ctx.send(embed = embed)
+    await ctx.send(embed=embed)
 
-    ### FIXME: doesn't support double-quotes (e.g. print("1+1"))
-    ### TODO: allow input
+    # FIXME: doesn't support double-quotes (e.g. print("1+1"))
+    # TODO: allow input
 
 bot.run(TOKEN)
