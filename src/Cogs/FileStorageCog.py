@@ -22,28 +22,49 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
         self.file_collection = self.client.gridfs
         self.fs = gridfs.GridFS(self.file_collection)
 
-    @commands.command(name='store', brief='Store small files < 1MB',
-                      description='Stores files that are less than 1MB in size',
-                      aliases=['fsput', 'putfile'])
+    @commands.command(name='store', brief='Store small files',
+                      description='Stores files',
+                      aliases=['fsput', 'putfile', 'save', 'savefile'])
     async def insert_file(self, ctx, filename=None):
         upload_url = ctx.message.attachments[0].url 
         file = requests.get(upload_url)
-        filename = filename if filename is not None else ctx.message.attachments[0].filename
+        file_name = filename if filename is not None else ctx.message.attachments[0].filename
 
-        inserted_file_id = self.fs.put(file.content, filename=filename, guild_id=ctx.guild.id)
+        # check double file names
+        for grid_out in self.fs.find({"filename": file_name}, no_cursor_timeout=True):
+            fileExists = discord.File(io.BytesIO(grid_out.read()), filename=file_name)
+            if fileExists is not None:
+                embed = discord.Embed(
+                    title=f"File '{file_name}' already exists", 
+                    color=0xff0000)
+                # await ctx.message.delete()
+                await ctx.send(embed=embed)
+                return
+
+        self.fs.put(file.content, filename=file_name, guild_id=ctx.guild.id, upload_url=upload_url)
         
-        await ctx.send(filename)
+        # await ctx.message.delete()
+        embed = discord.Embed(
+            title=f"File '{file_name}' created", 
+            color=0x00ff00)
+        await ctx.send(embed=embed)
 
-    @commands.command(name='get', brief='Store small files < 1MB',
-                      description='Stores files that are < 1MB',
-                      aliases=['fsget', 'getfile'])
+
+    @commands.command(name='get', brief='Store small files',
+                      description='Stores files',
+                      aliases=['fsget', 'getfile', 'retrieve'])
     async def get_file(self, ctx, file_name):
         file = self.fs.find_one({"filename": file_name})
         if file.guild_id == ctx.guild.id:
-            await ctx.send(embed=discord.Embed(title="File Delivery!", color=0x00ff00))
+            raw_file = discord.File(io.BytesIO(file.read()), filename=file_name)
 
-            file = discord.File(io.BytesIO(file.read()), filename=file_name)
-            await ctx.send(file=file)
+            if file_name.split('.')[1] in ["png", "ico", "jpg", "jpeg"]:
+                embed = discord.Embed(title="File Delivery!", color=0x00ff00).set_image(url=file.upload_url)
+                await ctx.send(embed=embed)
+            # idea to return embedded MarkDown if it's a md file
+            else:
+                await ctx.send(embed=discord.Embed(title="File Delivery!", color=0x00ff00))
+                await ctx.send(file=raw_file)
     
     @commands.command(name='list', brief='list files',
                       description='lists guild files',
@@ -51,4 +72,5 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
     async def list_files(self, ctx, query=None):
         for grid_out in self.fs.find({"guild_id": ctx.guild.id}, no_cursor_timeout=True):
             #   file = discord.File(io.BytesIO(grid_out.read()), filename=file_name)
-            await ctx.send(grid_out.filename)
+            embed = discord.Embed(title=grid_out.filename, color=0x00ff00).set_thumbnail(url=grid_out.__dict__['_file']['upload_url'])
+            await ctx.send(embed=embed)
