@@ -2,10 +2,8 @@ import discord
 import math
 import asyncio
 from discord.ext import commands
-try:
-    from src.Cogs.VoiceCog import VoiceCog
-except:
-     from Cogs.VoiceCog import VoiceCog
+
+from Cogs.VoiceCog import VoiceCog
     
 
 class TimerCog(commands.Cog):

@@ -1,28 +1,15 @@
 import os
 from discord.ext import commands
-try:
-    from src.Cogs.VoiceCog import VoiceCog
-    from src.Cogs.ChallengeCog import ChallengeCog
-    from src.Cogs.DocScraperCog import DocScraperCog
-    from src.Cogs.GitHubCog import GitHubCog
-    from src.Cogs.MathCog import MathCog
-    from src.Cogs.ReputationCog import ReputationCog
-    from src.Cogs.TimerCog import TimerCog
-    from src.Cogs.TioCog.TioCog import TioCog
-    from src.Cogs.FileStorageCog import FileStorageCog
-except:
-    from Cogs.VoiceCog import VoiceCog
-    from Cogs.ChallengeCog import ChallengeCog
-    from Cogs.DocScraperCog import DocScraperCog
-    from Cogs.GitHubCog import GitHubCog
-    from Cogs.MathCog import MathCog
-    from Cogs.ReputationCog import ReputationCog
-    from Cogs.TimerCog import TimerCog
-    from Cogs.TioCog.TioCog import TioCog
-    from Cogs.FileStorageCog import FileStorageCog
-# got it
-    # lets worry about this later, let's just work on trying to get the code done now. don't want to waste too much time down this rabbit hole lol
-# imma try in pycharm for windows
+
+from Cogs.VoiceCog import VoiceCog
+from Cogs.ChallengeCog import ChallengeCog
+from Cogs.DocScraperCog import DocScraperCog
+from Cogs.GitHubCog import GitHubCog
+from Cogs.MathCog import MathCog
+from Cogs.ReputationCog import ReputationCog
+from Cogs.TimerCog import TimerCog
+from Cogs.TioCog import TioCog
+from Cogs.FileStorageCog import FileStorageCog
 
 # or not... sigh
 try:
