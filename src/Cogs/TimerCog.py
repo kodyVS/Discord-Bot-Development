@@ -12,7 +12,6 @@ class TimerCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.voiceCog = bot.get_cog('VoiceCog')
-        print(self.voiceCog)
 
     @commands.command(name='timer', brief='Pomodoro-esque timer for productivity!',
                  description='Run a timer for x minutes and be alerted when your time is up.',

@@ -23,28 +23,25 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
 
     @commands.command(name='store', brief='Store small files < 1MB',
                       description='Stores files that are less than 1MB in size',
-                      aliases=['fsput', 'putfile']) # why is it not @bot.command?
-    async def insert_file(self, ctx, guild_id, filename=None):
-    # basicly, that .url is the link for the file, which is saved by discord
-    
-        file_url = ctx.message.attachments[0].url # -> so they call .store and then they attack a message?
-        print(ctx.message.attachments[0]) # hopefully the actual file, otherwise download from url
+                      aliases=['fsput', 'putfile'])
+    async def insert_file(self, ctx, filename=None):
+        upload_url = ctx.message.attachments[0].url 
+        file = requests.get(upload_url)
+        filename = filename if filename is not None else ctx.message.attachments[0].filename
 
-        # file_request = requests.get(attachment_url)
-        # print(file_request.content)
-
-        file = ctx.message.attachments[0]
-        filename = file.name if filename is not None else filename
-        inserted_file_id = self.fs.put(file.read(), filename=filename, guild_id=guild_id)
+        inserted_file_id = self.fs.put(file.content, filename=filename, guild_id=ctx.guild.id)
         
         await ctx.send(inserted_file_id)
 
     @commands.command(name='get', brief='Store small files < 1MB',
                       description='Stores files that are < 1MB',
                       aliases=['fsget', 'getfile'])
-    async def get_file(self, ctx, file_id, guild_id):
-        file = self.fs.get(file_id)
-        if file.guild_id is not guild_id:
+    async def get_file(self, ctx, file_id):
+        if file.guild_id is not ctx.guild.id:
             return None
+            
+        file = self.fs.get(file_id)
+        self.fs.find({"guild_id": ctx.guild.id})
+
         await ctx.send(embed=discord.Embed(title="File Delivery!", color=0x00ff00))
         await ctx.send(file=file)
