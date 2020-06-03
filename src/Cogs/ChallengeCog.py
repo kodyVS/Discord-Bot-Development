@@ -43,3 +43,5 @@ class ChallengeCog(commands.Cog):
 
         else:
             await ctx.send(f'{problem_number}\n\n{problem_content}')
+
+    
