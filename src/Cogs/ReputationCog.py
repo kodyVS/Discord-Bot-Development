@@ -19,8 +19,6 @@ class ReputationCog(commands.Cog):
             self.reputation_count_tracker[guild.id] = tempdict.copy()
             tempdict = tempdict.clear()
 
-        print(str(__name__) + " is ready!")
-
     @commands.Cog.listener()
     async def on_message(self, message):
         self.reputation_count_tracker[message.guild.id][message.author.name] += 1

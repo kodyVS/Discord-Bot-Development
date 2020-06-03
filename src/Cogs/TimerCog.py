@@ -2,8 +2,11 @@ import discord
 import math
 import asyncio
 from discord.ext import commands
-
-from src.Cogs.VoiceCog import VoiceCog
+try:
+    from src.Cogs.VoiceCog import VoiceCog
+except:
+     from Cogs.VoiceCog import VoiceCog
+    
 
 class TimerCog(commands.Cog):
     def __init__(self, bot):

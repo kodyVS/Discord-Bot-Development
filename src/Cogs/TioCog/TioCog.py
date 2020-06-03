@@ -1,7 +1,9 @@
 from discord.ext import commands
 import discord
-from src.Cogs.TioCog.grab_tio import Tio
-
+try:
+    from src.Cogs.TioCog.grab_tio import Tio
+except:
+    from Cogs.TioCog.grab_tio import Tio
 
 class TioCog(commands.Cog):
     def __init__(self, bot):
