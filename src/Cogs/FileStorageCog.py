@@ -1,5 +1,6 @@
 from discord.ext import commands
 import os
+import io
 import discord
 import random
 import requests
@@ -31,17 +32,23 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
 
         inserted_file_id = self.fs.put(file.content, filename=filename, guild_id=ctx.guild.id)
         
-        await ctx.send(inserted_file_id)
+        await ctx.send(filename)
 
     @commands.command(name='get', brief='Store small files < 1MB',
                       description='Stores files that are < 1MB',
                       aliases=['fsget', 'getfile'])
-    async def get_file(self, ctx, file_id):
-        if file.guild_id is not ctx.guild.id:
-            return None
-            
-        file = self.fs.get(file_id)
-        self.fs.find({"guild_id": ctx.guild.id})
+    async def get_file(self, ctx, file_name):
+        file = self.fs.find_one({"filename": file_name})
+        if file.guild_id == ctx.guild.id:
+            await ctx.send(embed=discord.Embed(title="File Delivery!", color=0x00ff00))
 
-        await ctx.send(embed=discord.Embed(title="File Delivery!", color=0x00ff00))
-        await ctx.send(file=file)
+            file = discord.File(io.BytesIO(file.read()), filename=file_name)
+            await ctx.send(file=file)
+    
+    @commands.command(name='list', brief='list files',
+                      description='lists guild files',
+                      aliases=['fslist', 'listfile'])
+    async def list_files(self, ctx, query=None):
+        for grid_out in self.fs.find({"guild_id": ctx.guild.id}, no_cursor_timeout=True):
+            #   file = discord.File(io.BytesIO(grid_out.read()), filename=file_name)
+            await ctx.send(grid_out.filename)
