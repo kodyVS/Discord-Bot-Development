@@ -10,6 +10,8 @@ from Cogs.ReputationCog import ReputationCog
 from Cogs.TimerCog import TimerCog
 from Cogs.TioCog import TioCog
 from Cogs.FileStorageCog import FileStorageCog
+from Cogs.TimezoneCog import TimezoneCog
+
 
 # or not... sigh
 try:
@@ -31,6 +33,8 @@ bot.add_cog(MathCog(bot))
 bot.add_cog(ReputationCog(bot))
 bot.add_cog(TioCog(bot))
 bot.add_cog(FileStorageCog(bot))
+bot.add_cog(TimezoneCog(bot))
+
 
 @bot.event
 async def on_ready():
