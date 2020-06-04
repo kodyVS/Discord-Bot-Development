@@ -13,7 +13,6 @@ from Cogs.FileStorageCog import FileStorageCog
 from Cogs.TimezoneCog import TimezoneCog
 
 
-# or not... sigh
 try:
     with open("DISCORD_TOKEN.txt", "r") as code:
         TOKEN = code.readlines()[0]
