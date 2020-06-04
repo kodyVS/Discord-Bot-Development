@@ -70,7 +70,25 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
                       description='lists guild files',
                       aliases=['fslist', 'listfile'])
     async def list_files(self, ctx, query=None):
+        message = None
         for grid_out in self.fs.find({"guild_id": ctx.guild.id}, no_cursor_timeout=True):
             #   file = discord.File(io.BytesIO(grid_out.read()), filename=file_name)
             embed = discord.Embed(title=grid_out.filename, color=0x00ff00).set_thumbnail(url=grid_out.__dict__['_file']['upload_url'])
+            message = await ctx.send(embed=embed)
+        if message is None:
+            embed = discord.Embed(title=f"Couldn't find any files for this Guild", color=0xff0000)
+            await ctx.send(embed=embed)
+    
+    @commands.command(name='delete', brief='delete file',
+                      description='delete guild file',
+                      aliases=['fsdelete', 'deletefile'])
+    async def delete_files(self, ctx, file_name):
+        file = self.fs.find_one({"filename": file_name})
+        try:
+            if file.guild_id == ctx.guild.id:
+                embed = discord.Embed(title=f"Deleted: {file.filename}", color=0xff0000).set_thumbnail(url=file.upload_url)
+                self.fs.delete(file._id)
+                await ctx.send(embed=embed)
+        except:
+            embed = discord.Embed(title=f"Couldn't find '{file_name}' to delete", color=0xff0000)
             await ctx.send(embed=embed)

@@ -17,7 +17,8 @@ from Cogs.TimezoneCog import TimezoneCog
 try:
     with open("DISCORD_TOKEN.txt", "r") as code:
         TOKEN = code.readlines()[0]
-except:
+except Exception as e:
+    print(e)
     TOKEN = os.environ.get('BOT_TOKEN')
 
 bot = commands.Bot(command_prefix='.', case_insensitive=True)
