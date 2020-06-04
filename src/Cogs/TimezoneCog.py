@@ -23,7 +23,7 @@ class TimezoneCog(commands.Cog):
         self.col = self.mydb["zones"]
 
         x = self.col.delete_many({})
-        print(x.deleted_count, "documents deleted.")
+        print(x.deleted_count, "document(s) deleted.")
 
     @commands.command(name='timezone',
                       description='Get current time of a timezone',
@@ -41,19 +41,21 @@ class TimezoneCog(commands.Cog):
     @commands.command(name='addtime', brief='Add your timezone to your guilds timezone', description='Makes your timezone publicly accessible', aliases=['mytime', 'myhour', 'mytimezone', 'addmytimezone'])
     async def my_time(self, ctx, zone: str):
 
-        myzonedict = {f"{ctx.author.name}": f"{zone}"}
+        myzonedict = {f"{ctx.author.name}": f"{zone}"} # FIXME: support for people who don't know their timezones
         for x in self.col.find():
-            for key in x.items():
+            for key in x.keys():
                 if key == ctx.author.name:
                     self.col.delete_one(x)
 
         self.col.insert_one(myzonedict)
 
-        embed = discord.Embed(title='Zone sent!', color=0x00fff00)
+        embed = discord.Embed(title='Zone sent & set!', color=0x00fff00)
         await ctx.send(embed=embed)
 
 
     @commands.command(name='seezone', brief="See somebody's timezone", description="Shows the current timezone of the person you are querying", aliases=['seetime', 'findzone', 'currenttime'])
+
+
     async def see_time(self, ctx, target: str):
 
         fmt = "%H:%M"
@@ -70,15 +72,34 @@ class TimezoneCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name = 'alltimes', brief = 'See all times of everyone registered', description = 'Shows the time of every registered user in this server.')
+
+
     async def all_times(self, ctx):
     
-        all_dicts = []
+        time_list = []
         fmt = "%H:%M"
 
         for x in self.col.find():
-            all_dicts.append(x)
+            time_list.append(list(x.items())[1]) # list with usernames and timezones
 
-        embed = discord.Embed(title='All times', color = 0x00ff00)
-        embed.add_field(name='Dictionary Times', value = all_dicts)
+        # prettify output if it can fit in the embed
+        if len(str(time_list)) < 1024:
+            for i in range(len(time_list)):
+                tz = time_list[i][1]
+                tz = timezone(tz)
+                tz_now = datetime.now(tz)
+                time_list[i] = str('**' + time_list[i][0] + '**: ' + tz_now.strftime(fmt))
 
-        await ctx.send(embed = embed)
+            embed = discord.Embed(title='All Times', color = 0x00ff00)
+            embed.add_field(name='User + Time', value = '\n'.join(time_list)) # TODO: prettify (and check for char len > 1024)
+
+            await ctx.send(embed = embed)
+        
+        else:
+
+            for i in range(len(time_list)):
+                time_list[i] = str(time_list[i]) + '\n'
+
+            time_list = str(time_list)
+
+            await ctx.send(time_list)
