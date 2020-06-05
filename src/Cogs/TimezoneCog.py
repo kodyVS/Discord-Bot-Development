@@ -67,19 +67,33 @@ class TimezoneCog(commands.Cog):
 
     @commands.command(
         name="addtime",
-        brief="Add your timezone to your guilds timezone",
+        brief="Add your timezone and free hours to your guilds timezone",
         description="Makes your timezone publicly accessible. Input either your timezone as a region or the current hour",
-        aliases=["mytime", "myhour", "mytimezone", "addmytimezone", "settime"],
+        aliases=[
+            "mytime",
+            "myhour",
+            "mytimezone",
+            "addmytimezone",
+            "settime",
+            "myfreetime",
+            "nowork",
+            "myfreehours",
+            "freetime",
+            "codetime",
+            "available",
+        ],
     )
-    async def my_time(self, ctx, zone):
+    async def my_time(self, ctx, zone, *args):
 
-        myzonedict = {f"{ctx.author.name}": [f"{zone}", f"{ctx.message.guild.id}"]}
+        myzonedict = {
+            f"{ctx.author.name}": [f"{zone}", f"{ctx.message.guild.id}", list(args)]
+        }  # adding user info
 
         for x in self.col.find():
             if list(x.keys())[1] == str(
                 ctx.author.name
             ):  # check if USERNAME is there, not guild...
-            
+
                 for key in x.keys():
                     if key == ctx.author.name:
                         self.col.delete_one(x)
@@ -116,10 +130,65 @@ class TimezoneCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(
+        name="seehours",
+        brief="See somebody's free hours (adjusted)",
+        aliases=["viewhours", "viewfreetime", "seefreetime"],
+    )
+    async def see_hours(self, ctx, target):
+
+        for x in self.col.find({}, {target}):
+
+            if x[target][1] == str(ctx.message.guild.id):
+                result_obj = x[target]
+
+        result_hours = result_obj[2]
+        result_timezone = result_obj[0]
+
+        # adjust based on user's timezone
+        for x in self.col.find({}, {ctx.author.name}):
+
+            if x[target][1] == str(ctx.message.guild.id):
+                user_obj = x[target]
+
+        user_timezone = user_obj[0]
+
+        # convert timezone to utc TIME & same for user_timezone
+        utc_time = dt.utcnow()
+
+        user_time = timezone(user_timezone)
+        result_time = timezone(result_timezone)
+
+        user_hour = pytz.utc.localize(utc_time, is_dst=None).astimezone(user_time).hour
+
+        result_hour = pytz.utc.localize(utc_time, is_dst = None).astimezone(result_time).hour
+
+        result_hours = [int(hour) for hour in result_hours]
+
+        target_hours_adjusted = sorted(
+            [hour + (user_hour - result_hour) for hour in result_hours]
+        )
+
+        target_hours_adjusted = [str(hour) for hour in target_hours_adjusted]
+
+        embed = discord.Embed(
+            title="Target Adjusted Free Hours",
+            description="\n".join(target_hours_adjusted),
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.command(
         name="alltimes",
         brief="See all times of everyone registered",
         description="Shows the time of every registered user in this server.",
-        aliases=["everytime", "alltime", "guiltimes", "alltimezones", "alltimezone", "timelist"],
+        aliases=[
+            "everytime",
+            "alltime",
+            "guiltimes",
+            "alltimezones",
+            "alltimezone",
+            "timelist",
+        ],
     )
     async def all_times(self, ctx):
         time_list = []
@@ -157,9 +226,3 @@ class TimezoneCog(commands.Cog):
             time_list = str(time_list)
 
             await ctx.send(time_list)
-
-    @commands.command(name = 'amfree', brief = 'Type in your free hours', description = 'Sends your freetime hours to the database for access by others', aliases = ['myfreetime', 'freehours', 'cancode', 'nowork'])
-    async def am_free(self, ctx, *args):
-        # requires that you have already put your timezone into the database
-        
-        pass
