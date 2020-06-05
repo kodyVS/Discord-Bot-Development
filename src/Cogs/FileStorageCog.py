@@ -58,7 +58,7 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
         if file.guild_id == ctx.guild.id:
             raw_file = discord.File(io.BytesIO(file.read()), filename=file_name)
 
-            if file_name.split('.')[1] in ["png", "ico", "jpg", "jpeg"]:
+            if file_name.split('.')[1] in ["png", "jpg", "jpeg"]:
                 embed = discord.Embed(title="File Delivery!", color=0x00ff00).set_image(url=file.upload_url)
                 await ctx.send(embed=embed)
             # idea to return embedded MarkDown if it's a md file
