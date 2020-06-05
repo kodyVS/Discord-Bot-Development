@@ -158,10 +158,8 @@ class TimezoneCog(commands.Cog):
 
             await ctx.send(time_list)
 
-    @commands.command(
-        name="convertimezone",
-        brief="Converts between timezones",
-        aliases=["ctz", "convertime", "convertz", "comparetimezones"],
-    )
-    async def compare_timezones(self, ctx, *args):
+    @commands.command(name = 'amfree', brief = 'Type in your free hours', description = 'Sends your freetime hours to the database for access by others', aliases = ['myfreetime', 'freehours', 'cancode', 'nowork'])
+    async def am_free(self, ctx, *args):
+        # requires that you have already put your timezone into the database
+        
         pass
