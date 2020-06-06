@@ -1,0 +1,21 @@
+version: '3.3'
+services:
+  discord_bot:
+    image: pg_bot:latest
+    environment: 
+      MONGO_URI: mongodb://root:rootpassword@mongodb_container/?authSource=admin
+      #DISCORD_TOKEN: <your-production-token> # not needed for dev!
+    depends_on: 
+      - mongodb_container
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:
