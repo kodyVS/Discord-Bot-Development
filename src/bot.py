@@ -1,4 +1,7 @@
 import os
+import random
+
+import discord
 from discord.ext import commands
 
 from src.Cogs.ChallengeCog import ChallengeCog
@@ -11,12 +14,6 @@ from src.Cogs.TioCog.TioCog import TioCog
 from src.Cogs.VoiceCog import VoiceCog
 
 reputation_count_tracker = {}
-
-try:
-    with open("DISCORD_TOKEN.txt", "r") as code:
-        TOKEN = code.readlines()[0]
-except:
-    TOKEN = os.environ.get('BOT_TOKEN')
 
 bot = commands.Bot(command_prefix='.', case_insensitive=True)
 
@@ -31,9 +28,36 @@ bot.add_cog(MathCog(bot))
 bot.add_cog(ReputationCog(bot))
 bot.add_cog(TioCog(bot))
 
+
 @bot.event
 async def on_ready():
     print("PGbot is ready!")
 
+
+@bot.event
+async def on_command_error(ctx, error):
+    """The event triggered when an error is raised while invoking a command"""
+    await ctx.send(embed=discord.Embed(title=random.choice(["Uh-oh!", "Boop beep, Beep boop?",
+                                                            "Oooh whatcha say-ay??",
+                                                            "Not sure what happened...",
+                                                            "Couldn't handle, no, literally.",
+                                                            "Whoops!",
+                                                            "Nope, nope, nope!",
+                                                            "Don't let your dreams be dreams...",
+                                                            "Prepare for trouble!",
+                                                            "Catastrophic Failure",
+                                                            "This time, it’s the human’s fault"]),
+                                       description="Some error occurred. Try something else?",
+                                       color=0xff0000))
+
+    if not os.environ.get('ENVIRONMENT') == "PROD":
+        await ctx.send(embed=discord.Embed(title="Debug info:", description=str(error.original), color=0x0000ff))
+
+
+try:
+    with open("DISCORD_TOKEN.txt", "r") as code:
+        TOKEN = code.readlines()[0]
+except FileNotFoundError:
+    TOKEN = os.environ.get('BOT_TOKEN')
 
 bot.run(TOKEN)
