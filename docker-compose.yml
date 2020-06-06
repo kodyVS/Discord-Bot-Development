@@ -2,13 +2,30 @@ version: '3.3'
 services:
   discord_bot:
     image: pg_bot:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 3
+          window: 120s
     environment: 
       MONGO_URI: mongodb://root:rootpassword@mongodb_container/?authSource=admin
-      #DISCORD_TOKEN: <your-production-token> # not needed for dev!
+      ENVIRONMENT: "DEV" # NOT PROD
+      #DISCORD_TOKEN: <your-production-token> # NEEDED WHEN PROD
     depends_on: 
       - mongodb_container
+    labels:
+      - type: "bot"
   mongodb_container:
     image: mongo:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 3
+          window: 120s
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
@@ -16,6 +33,8 @@ services:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
+    labels:
+      - type: "database"
 
 volumes:
   mongodb_data_container:
