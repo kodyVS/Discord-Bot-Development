@@ -3,6 +3,7 @@
 # ignore the token-file
 DISCORD_TOKEN.txt 
 .idea/
+.vscode/
 
 # Created by https://www.gitignore.io/api/venv,python,sublimetext,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=venv,python,sublimetext,visualstudio,visualstudiocode

@@ -8,7 +8,7 @@ class ReputationCog(commands.Cog):
         self.reputation_count_tracker = {}
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self): # we should add rep for reactions to posts and mentions
         await self.bot.change_presence(activity=discord.Game(name=". for commands"))
         for guild in self.bot.guilds:
 
@@ -19,13 +19,11 @@ class ReputationCog(commands.Cog):
             self.reputation_count_tracker[guild.id] = tempdict.copy()
             tempdict = tempdict.clear()
 
-        print(str(__name__) + " is ready!")
-
     @commands.Cog.listener()
     async def on_message(self, message):
         self.reputation_count_tracker[message.guild.id][message.author.name] += 1
 
-    @commands.command(name='reputation')
+    @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system.')
     async def reputation(self, ctx):
         member = ctx.author.name
-        await ctx.send("Member {} \nReputation {}".format(member, self.reputation_count_tracker[ctx.guild.id][member]))
+        await ctx.send("Member **{}** \nReputation **{}**".format(member, self.reputation_count_tracker[ctx.guild.id][member]))
