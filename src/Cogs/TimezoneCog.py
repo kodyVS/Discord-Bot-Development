@@ -114,7 +114,7 @@ class TimezoneCog(commands.Cog):
         ],
     )
     async def my_time(self, ctx, zone, *args):
-        #FIXME: need to check for input and stop people from entering invalid timezones
+
         myzonedict = {
             f"{ctx.author.name}": [f"{zone}", f"{ctx.message.guild.id}", list(args)]
         }  # adding user info
@@ -122,7 +122,7 @@ class TimezoneCog(commands.Cog):
         for x in self.col.find():
             if list(x.keys())[1] == str(
                 ctx.author.name
-            ):  # check if USERNAME is there, not guild...
+            ) and list(x.values())[1] == str(ctx.message.guild.id):  # check if USERNAME is there, not guild...
 
                 for key in x.keys():
                     if key == ctx.author.name:
