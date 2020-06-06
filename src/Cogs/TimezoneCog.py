@@ -16,9 +16,8 @@ class TimezoneCog(commands.Cog):
         self.bot = bot
 
         try:
-            mongo_uri = os.environ.get("MONGO_URI_TWO")
+            mongo_uri = os.environ.get("MONGO_URI")
         except KeyError:
-            print("MONG_URI was not set. Using localhost.")
             mongo_uri = "mongodb://localhost:27017/"
 
         self.client = MongoClient(mongo_uri)

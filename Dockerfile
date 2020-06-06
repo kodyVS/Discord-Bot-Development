@@ -6,5 +6,6 @@ COPY REQUIREMENTS.txt /app/requirements.txt
 WORKDIR /app  
 RUN pip install -r requirements.txt
 RUN rm requirements.txt
-
+# RUN apt install ffmpeg
+# RUN python src/bot.py
 
