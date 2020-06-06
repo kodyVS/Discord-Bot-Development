@@ -30,10 +30,12 @@ class TimezoneCog(commands.Cog):
 
     @commands.command(
         name="timezone",
-        description="Get current time of a timezone",
+        brief="Get current UTC time, or a specific timezone.",
+        description="Enter a timezone to get the current time, or leave empty to get UTC time.",
         aliases=["time", "tz"],
     )
     async def timezone(self, ctx, zone: str = "UTC"):
+    # returns current time of given timezone, if no time is set then return current time in UTC
         fmt = "%H:%M"
         now_time = dt.now(timezone(zone))
         embed = discord.Embed(
@@ -66,12 +68,40 @@ class TimezoneCog(commands.Cog):
         return results
 
     @commands.command(
+        name="currenthour",
+        brief="Enter your current hour in 24 hour format and the bot will suggest some timezones.",
+        description="Enter your current hour in 24 hour format (ex: 8 PM = 20) and the bot will return a list of timezones for you to register yourself under.",
+        aliases=[
+            "tzhelp",
+            "timehelp",
+            "hour",
+            "myhour",
+        ],
+    )
+    async def my_hour(self, ctx, hour):
+        # take user hour input, subtract their time from UTC time to get their time difference
+        # return list of possible timezones for them to use for adding their timezone
+        if (int(hour) >= 0) and (int(hour) <= 23):
+            fmt = "%H"
+            now_time = dt.now(timezone('UTC'))
+            new_time = now_time.strftime(fmt)
+            hour_diff = int(hour) - int(new_time)
+            hours = self.possible_timezones(hour_diff)
+
+            embed = discord.Embed(title="Possible Timezones",
+                                  description=f"The following are possible timezones you can set your time to:\n{str(hours)[1:-1]}",
+                                  color=0x00FFF00)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("Invalid hours. Enter your current hour in 24 hour format. (example: 8 PM = 20)")
+
+
+    @commands.command(
         name="addtime",
         brief="Add your timezone and free hours to your guilds timezone",
         description="Makes your timezone publicly accessible. Input either your timezone as a region or the current hour",
         aliases=[
             "mytime",
-            "myhour",
             "mytimezone",
             "addmytimezone",
             "settime",
@@ -84,7 +114,7 @@ class TimezoneCog(commands.Cog):
         ],
     )
     async def my_time(self, ctx, zone, *args):
-
+        #FIXME: need to check for input and stop people from entering invalid timezones
         myzonedict = {
             f"{ctx.author.name}": [f"{zone}", f"{ctx.message.guild.id}", list(args)]
         }  # adding user info
@@ -100,17 +130,18 @@ class TimezoneCog(commands.Cog):
 
         self.col.insert_one(myzonedict)
 
-        embed = discord.Embed(title="Zone sent & set!", color=0x00FFF00)
+        embed = discord.Embed(title="Zone sent & set!",
+                              description=f"**{ctx.author.name}**'s timezone has been set to **{zone}**.",
+                              color=0x00FFF00)
         await ctx.send(embed=embed)
 
     @commands.command(
         name="seezone",
         brief="See somebody's timezone",
         description="Shows the current timezone of the person you are querying",
-        aliases=["seetime", "findzone", "currenttime"],
+        aliases=["seetime", "seetimes", "findzone", "currenttime"],
     )
     async def see_time(self, ctx, target: str):
-
         fmt = "%H:%M"
         for x in self.col.find({}, {target}):
 

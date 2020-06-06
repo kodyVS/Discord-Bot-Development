@@ -2,6 +2,7 @@ import os
 from discord.ext import commands
 
 from Cogs.VoiceCog import VoiceCog
+from Cogs.HelpCog import HelpCog
 from Cogs.ChallengeCog import ChallengeCog
 from Cogs.DocScraperCog import DocScraperCog
 from Cogs.GitHubCog import GitHubCog
@@ -21,10 +22,12 @@ except Exception as e:
     TOKEN = os.environ.get('BOT_TOKEN')
 
 bot = commands.Bot(command_prefix='.', case_insensitive=True)
+bot.remove_command('help')
 
 # order is important, as VoiceCog needs to be initialised first to be passed on to the TimerCog e.g.
 bot.add_cog(VoiceCog(bot))
 bot.add_cog(TimerCog(bot))
+bot.add_cog(HelpCog(bot))
 
 bot.add_cog(ChallengeCog(bot))
 bot.add_cog(DocScraperCog(bot))
