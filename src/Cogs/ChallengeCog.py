@@ -5,7 +5,6 @@ import praw
 
 from bs4 import BeautifulSoup
 from discord.ext import commands
-import pandas as pd
 import datetime as dt
 
 def chunkstring(string, length):
