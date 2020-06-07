@@ -31,9 +31,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
+      - /data/pgbot/db:/data/db
     labels:
       type: "database"
 
-volumes:
-  mongodb_data_container:
