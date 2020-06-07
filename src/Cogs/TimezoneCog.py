@@ -24,9 +24,6 @@ class TimezoneCog(commands.Cog):
         self.mydb = self.client["heroku_77s03rlb"]
         self.col = self.mydb["zones"]
 
-        x = self.col.delete_many({})
-        print(x.deleted_count, "document(s) deleted.")
-
     @commands.command(
         name="timezone",
         brief="Get current UTC time, or a specific timezone.",

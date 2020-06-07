@@ -35,7 +35,6 @@ bot.add_cog(FileStorageCog(bot))
 bot.add_cog(TimezoneCog(bot))
 
 
-
 @bot.event
 async def on_ready():
     print("PGbot is ready!")
