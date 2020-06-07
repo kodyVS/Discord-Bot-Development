@@ -99,7 +99,7 @@ class ChallengeCog(commands.Cog):
             await ctx.send(f'Problem Number: {number}\n{problem_content}')
 
     @commands.command(name = 'reddit', brief = 'Find challenges from Reddit', aliases = ['r/', 'r/dailyprogrammer'])
-    async def reddit_challenges(self, ctx, pick_from: int = 10, sort: str = 'hot'):
+    async def reddit_challenges(self, ctx, sub_reddit: str = 'dailyprogrammer', pick_from: int = 10, sort: str = 'hot'):
         # Subreddit to get challenges from
         reddit = praw.Reddit(client_id='RkdLUKFNy0Je8g', \
                         client_secret='yGHu1zcfiVw0J2l_0qdYYGhzGvY', \
@@ -107,7 +107,7 @@ class ChallengeCog(commands.Cog):
                         username='PGbot-discord', \
                         password='ProgrammingGroupisCOOL')
 
-        subreddit = reddit.subreddit('dailyprogrammer')
+        subreddit = reddit.subreddit(sub_reddit)
 
         if sort == 'top':
             possibilities = [(submission.title, submission.selftext) for submission in subreddit.top(limit = pick_from)]
