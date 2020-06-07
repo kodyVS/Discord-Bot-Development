@@ -44,5 +44,8 @@ Then copy this TOKEN inside the `DISCORD_TOKEN.txt` file.
 *  Select to merge into the master-branch, write what you changed/made in the message, etc.
 *  Create the PR.
 
+# Docker
+There's a Dockerfile present, be sure to put the DISCORD_TOKEN.txt in the right position before building the image.
 
+the docker-compose.yml is for development, but can be altered for production.
 
