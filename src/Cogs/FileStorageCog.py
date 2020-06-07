@@ -17,7 +17,7 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
             mongo_uri = 'mongodb://localhost:27017/'
 
         self.client = MongoClient(mongo_uri)
-        self.file_collection = self.client.gridfs
+        self.file_collection = self.client["heroku_77s03rlb"]
         self.fs = gridfs.GridFS(self.file_collection)
 
     @staticmethod

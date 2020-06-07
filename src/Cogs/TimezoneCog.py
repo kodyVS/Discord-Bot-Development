@@ -21,7 +21,7 @@ class TimezoneCog(commands.Cog):
             mongo_uri = "mongodb://localhost:27017/"
 
         self.client = MongoClient(mongo_uri)
-        self.mydb = self.client["timedatabase"]
+        self.mydb = self.client["heroku_77s03rlb"]
         self.col = self.mydb["zones"]
 
         x = self.col.delete_many({})
