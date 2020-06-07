@@ -1,9 +1,15 @@
 import discord
 import random
 import requests
+import praw
 
 from bs4 import BeautifulSoup
 from discord.ext import commands
+import pandas as pd
+import datetime as dt
+
+def chunkstring(string, length):
+    return (string[0+i:length+i] for i in range(0, len(string), length))
 
 
 class ChallengeCog(commands.Cog):
@@ -91,3 +97,43 @@ class ChallengeCog(commands.Cog):
         else:
 
             await ctx.send(f'Problem Number: {number}\n{problem_content}')
+
+    @commands.command(name = 'reddit', brief = 'Find challenges from Reddit', aliases = ['r/', 'r/dailyprogrammer'])
+    async def reddit_challenges(self, ctx, pick_from: int = 10, sort: str = 'hot'):
+        # Subreddit to get challenges from
+        reddit = praw.Reddit(client_id='RkdLUKFNy0Je8g', \
+                        client_secret='yGHu1zcfiVw0J2l_0qdYYGhzGvY', \
+                        user_agent='PGbot', \
+                        username='PGbot-discord', \
+                        password='ProgrammingGroupisCOOL')
+
+        subreddit = reddit.subreddit('dailyprogrammer')
+
+        if sort == 'top':
+            possibilities = [(submission.title, submission.selftext) for submission in subreddit.top(limit = pick_from)]
+        
+        elif sort == 'hot':
+            possibilities = [(submission.title, submission.selftext) for submission in subreddit.hot(limit = pick_from)]
+
+        elif sort == 'new':
+            possibilities = [(submission.title, submission.selftext) for submission in subreddit.new(limit = pick_from)]
+
+        chosen = random.choice(possibilities)
+
+        if len(chosen[1]) < 1024:
+            embed = discord.Embed(title = chosen[0], description = chosen[1], color = 0x00ff00)
+
+            await ctx.send(embed=embed)
+
+        else:
+            if len(chosen[1]) < 1024:
+
+                await ctx.send(chosen[1])
+
+            else:
+
+                chosen_full = list(chunkstring(str(chosen[1]), 1014))
+
+                for i in range(len(chosen_full)):
+                    embed = discord.Embed(title = chosen[0], description = chosen_full[i], color = 0x00ff00)
+                    await ctx.send(embed = embed)
