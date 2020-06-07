@@ -98,7 +98,7 @@ class ChallengeCog(commands.Cog):
 
             await ctx.send(f'Problem Number: {number}\n{problem_content}')
 
-    @commands.command(name = 'reddit', brief = 'Find challenges from Reddit', aliases = ['r/', 'r/dailyprogrammer'])
+    @commands.command(name = 'reddit', brief = 'Find challenges from Reddit', description = 'Gets challenges from any subreddit! Suggested: dailyprogrammer, programmingchallenges.', aliases = ['r/', 'r/dailyprogrammer'])
     async def reddit_challenges(self, ctx, sub_reddit: str = 'dailyprogrammer', pick_from: int = 10, sort: str = 'hot'):
         # Subreddit to get challenges from
         reddit = praw.Reddit(client_id='RkdLUKFNy0Je8g', \
