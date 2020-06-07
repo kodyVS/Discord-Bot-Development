@@ -17,8 +17,9 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
             mongo_uri = 'mongodb://localhost:27017/'
 
         self.client = MongoClient(mongo_uri)
-        self.file_collection = self.client["heroku_77s03rlb"]
-        self.fs = gridfs.GridFS(self.file_collection)
+        database_name = mongo_uri.split(':')[3].split('/')[1]
+        self.database = self.client[database_name]
+        self.fs = gridfs.GridFS(self.database)
 
     @staticmethod
     async def return_error(ctx, file_name=None):
