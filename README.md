@@ -13,7 +13,7 @@ If you already have the code skip this step!
 `git clone https://github.com/kodyVS/Discord-Bot-Development`
 
 Then make sure to install the python's REQUIREMENTS.txt also through some cmd  
-`pip install -r REQUIREMENTS.txt` or `pip3 install -r REQUIREMENTS.txt`  
+`pip install -r requirements.txt` or `pip3 install -r requirements.txt`  
 
 inside the `src` folder create a file called `DISCORD_TOKEN.txt`  
 
