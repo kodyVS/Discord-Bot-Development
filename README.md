@@ -49,3 +49,6 @@ There's a Dockerfile present, be sure to put the DISCORD_TOKEN.txt in the right 
 
 the docker-compose.yml is for development, but can be altered for production.
 
+
+# Best of Luck!
+
