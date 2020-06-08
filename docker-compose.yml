@@ -11,12 +11,11 @@ services:
           window: 120s
     environment: 
       MONGO_URI: mongodb://root:rootpassword@mongodb_container/?authSource=admin
-      ENVIRONMENT: "DEV" # NOT PROD
-      #DISCORD_TOKEN: <your-production-token> # NEEDED WHEN PROD
+      ENVIRONMENT: "DEV" # or "PROD"
     depends_on: 
       - mongodb_container
     labels:
-      - type: "bot"
+      type: "bot"
   mongodb_container:
     image: mongo:latest
     deploy:
@@ -32,9 +31,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
+      - /data/pgbot/db:/data/db
     labels:
-      - type: "database"
+      type: "database"
 
-volumes:
-  mongodb_data_container:
