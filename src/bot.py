@@ -42,7 +42,12 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
+    if isinstance(error, discord.ext.commands.CommandNotFound):
+        print(f"ignored error: '{error}'")
+        return
+    
     print(error)
+
     """The event triggered when an error is raised while invoking a command"""
     await ctx.send(embed=discord.Embed(title=random.choice(["Uh-oh!", "Boop beep, Beep boop?",
                                                             "Oooh whatcha say-ay??",
