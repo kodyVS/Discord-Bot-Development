@@ -67,9 +67,15 @@ class TimerCog(commands.Cog):
                         def check(reaction, user):
                             return user == ctx.author and str(reaction.emoji) == thumbsup
 
-                        # 10 seconds to check for reaction from user
-                        await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
-                        print(await self.timer(ctx, minutes=minutes))
+                        try:
+                            # 10 seconds to check for reaction from user
+                            reaction = await self.bot.wait_for('reaction_add', timeout=10, check=check)
+                            await self.timer(ctx, minutes=minutes)
+                        except asyncio.TimeoutError:
+                            """If nobody gave a reaction"""
+                            pass
+                    
+
 
         except ValueError:
             embed = discord.Embed(title='Invalid Time Set')
