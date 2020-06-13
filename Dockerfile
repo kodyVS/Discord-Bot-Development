@@ -1,18 +1,20 @@
-FROM python:3.7
+FROM python:3.7-alpine
 
 #ENV MONGO_URI="" # your MongoDB connection string
 #ENV ENVIRONMENT="PROD"  # PROD or DEV
 
-RUN mkdir /app
-COPY ./src /app
-COPY requirements.txt /app/requirements.txt
+RUN apk update
+RUN apk add ffmpeg 
+RUN apk add libffi-dev
+RUN apk add make
 
-WORKDIR /app  
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev
+COPY requirements.txt /temp/requirements.txt
+WORKDIR /temp  
 RUN pip install -r requirements.txt
-RUN rm requirements.txt
+RUN apk del .build-deps
 
-RUN apt update
-RUN apt install ffmpeg -y
-
+WORKDIR /app
+COPY src /app
 CMD ["python", "-u", "bot.py"]
 
