@@ -24,7 +24,12 @@ class FileStorageCog(commands.Cog, name='FileStorageCog'):
                       description='Store a file to the current Guild',
                       aliases=['fsput', 'putfile', 'save', 'savefile'])
     async def insert_file(self, ctx, filename=None):
-        await self.file_storage.insert_file(ctx, filename)
+        embed = await self.file_storage.insert_file(ctx.message.attachments[0].url, 
+            ctx.message.attachments[0].filename, 
+            filename,
+            ctx.guild.id)
+        
+        await ctx.send(embed=embed)
 
     @commands.command(name='get', brief='Retrieve a file',
                       description='Retrieves a file of the current Guild by filename',

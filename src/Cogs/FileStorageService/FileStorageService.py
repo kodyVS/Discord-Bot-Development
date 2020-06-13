@@ -22,44 +22,44 @@ class FileStorageService(object):
     @staticmethod
     async def return_error(ctx, file_name=None):
         embed = discord.Embed(title=f"Couldn't find file '{file_name}'" if file_name is not None else
-        "Couldn't find any files", color=0xff0000)
+                              "Couldn't find any files", color=0xff0000)
         await ctx.send(embed=embed)
 
-    async def insert_file(self, ctx, file_name):
-        upload_url = ctx.message.attachments[0].url
+    async def insert_file(self, upload_url, standard_file_name, file_name, guild_id):
         file = requests.get(upload_url)
-        file_name = file_name if file_name is not None else ctx.message.attachments[0].filename
+        file_name = file_name if file_name is not None else standard_file_name
 
         # check double file names
-        for grid_out in self.fs.find({"filename": file_name}, no_cursor_timeout=True):
-            file_exists = discord.File(io.BytesIO(grid_out.read()), filename=file_name)
+        async for grid_out in self.fs.find({"filename": file_name}, no_cursor_timeout=True):
+            file_exists = discord.File(io.BytesIO(
+                grid_out.read()), filename=file_name)
             if file_exists is not None:
-                embed = discord.Embed(
+                return discord.Embed(
                     title=f"File '{file_name}' already exists",
                     color=0xff0000)
-                await ctx.send(embed=embed)
-                return
 
-        self.fs.put(file.content, filename=file_name, guild_id=ctx.guild.id, upload_url=upload_url)
-
-        embed = discord.Embed(
+        self.fs.put(file.content, filename=file_name,
+                    guild_id=guild_id, upload_url=upload_url)
+        return discord.Embed(
             title=f"File '{file_name}' created",
             color=0x00ff00)
-        await ctx.send(embed=embed)
 
     async def get_file(self, ctx, file_name):
         file = self.fs.find_one({"filename": file_name})
         try:
             if file.guild_id == ctx.guild.id:
-                raw_file = discord.File(io.BytesIO(file.read()), filename=file_name)
+                raw_file = discord.File(io.BytesIO(
+                    file.read()), filename=file_name)
 
                 try:
-                    is_image = file_name.split('.')[1] in ["png", "jpg", "jpeg"]
+                    is_image = file_name.split('.')[1] in [
+                        "png", "jpg", "jpeg"]
                 except:
                     is_image = False
 
                 if is_image:
-                    embed = discord.Embed(title=file.filename, description="File Delivery!", color=0x00ff00).set_image(url=file.upload_url)
+                    embed = discord.Embed(
+                        title=file.filename, description="File Delivery!", color=0x00ff00).set_image(url=file.upload_url)
                     await ctx.send(embed=embed)
                 # idea to return embedded MarkDown if it's a md file
                 else:
