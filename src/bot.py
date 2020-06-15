@@ -13,7 +13,7 @@ from Cogs.MathCog import MathCog
 from Cogs.ReputationCog import ReputationCog
 from Cogs.TimerCog import TimerCog
 from Cogs.TioCog import TioCog
-from Cogs.FileStorageCog import FileStorageCog
+from Cogs.FileStorageService.FileStorageCog import FileStorageCog
 from Cogs.TimezoneCog import TimezoneCog
 
 
