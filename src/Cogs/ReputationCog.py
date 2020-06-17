@@ -1,14 +1,16 @@
 from discord.ext import commands
 import discord
-
+from datetime import datetime
+import math
 
 class ReputationCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.reputation_count_tracker = {}
+        self.active_members = {}
 
     @commands.Cog.listener()
-    async def on_ready(self): # we should add rep for reactions to posts and mentions
+    async def on_ready(self):  # we should add rep for reactions to posts and mentions
         await self.bot.change_presence(activity=discord.Game(name=". for commands"))
         for guild in self.bot.guilds:
 
@@ -19,11 +21,46 @@ class ReputationCog(commands.Cog):
             self.reputation_count_tracker[guild.id] = tempdict.copy()
             tempdict = tempdict.clear()
 
+            for channel in guild.channels:
+                self.active_members[channel.id] = {}
+                for member in guild.members:
+                    self.active_members[channel.id][member.name] = None
+
+
+
     @commands.Cog.listener()
     async def on_message(self, message):
         self.reputation_count_tracker[message.guild.id][message.author.name] += 1
+
+    # on_reaction_add https://discordpy.readthedocs.io/en/latest/api.html#discord.on_reaction_add
+
 
     @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system.')
     async def reputation(self, ctx):
         member = ctx.author.name
         await ctx.send("Member **{}** \nReputation **{}**".format(member, self.reputation_count_tracker[ctx.guild.id][member]))
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        # Bots dont need reputation
+        if member.bot:
+            return
+
+        async def add_active_member(member, after):
+            self.active_members[after.channel.id][member.name] = datetime.now().strftime("%m/%d/%Y, %H:%M:%S") 
+
+        async def remove_and_credit_leaving_member(member, before):
+            leaving_member_active_since = self.active_members[before.channel.id][member.name]
+            joined_at = datetime.strptime(leaving_member_active_since, "%m/%d/%Y, %H:%M:%S")
+
+            td = datetime.now()-joined_at
+            time_points = math.ceil(((td.seconds//60)%60) * 0.25)
+            self.reputation_count_tracker[member.guild.id][member.name] += time_points
+
+        # on voice-channel join
+        if before.channel is None and after.channel is not None:
+            await add_active_member(member, after)
+
+        # on voice-channel leave
+        if after.channel is None and before.channel is not None:
+            await remove_and_credit_leaving_member(member, before)
