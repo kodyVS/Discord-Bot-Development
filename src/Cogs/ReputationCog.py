@@ -9,6 +9,11 @@ class ReputationCog(commands.Cog):
         self.reputation_count_tracker = {}
         self.active_members = {}
 
+    @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system.')
+    async def reputation(self, ctx):
+        member = ctx.author.name
+        await ctx.send("Member **{}** \nReputation **{}**".format(member, self.reputation_count_tracker[ctx.guild.id][member]))
+
     @commands.Cog.listener()
     async def on_ready(self):  # we should add rep for reactions to posts and mentions
         await self.bot.change_presence(activity=discord.Game(name=". for commands"))
@@ -26,23 +31,19 @@ class ReputationCog(commands.Cog):
                 for member in guild.members:
                     self.active_members[channel.id][member.name] = None
 
-
-
     @commands.Cog.listener()
     async def on_message(self, message):
         self.reputation_count_tracker[message.guild.id][message.author.name] += 1
 
-    # on_reaction_add https://discordpy.readthedocs.io/en/latest/api.html#discord.on_reaction_add
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        if user.bot or reaction.me:
+            return
 
-
-    @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system.')
-    async def reputation(self, ctx):
-        member = ctx.author.name
-        await ctx.send("Member **{}** \nReputation **{}**".format(member, self.reputation_count_tracker[ctx.guild.id][member]))
+        self.reputation_count_tracker[reaction.message.guild.id][user.name] += 0.5
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        # Bots dont need reputation
         if member.bot:
             return
 
