@@ -26,51 +26,51 @@ class FileStorageService(object):
         # check double file names
         for grid_out in self.fs.find({"filename": file_name}, no_cursor_timeout=True):
             file_exists = discord.File(io.BytesIO(
-                grid_out.read()), filename=file_name)
+                grid_out.read()), filename=str(guild_id)+"_"+file_name)
             if file_exists is not None:
                 return discord.Embed(
-                    title=f"File '{file_name}' already exists",
+                    title=f"File '{file_name}' already exists in the Guild",
                     color=0xff0000)
 
-        self.fs.put(file.content, filename=file_name,
+        self.fs.put(file.content, filename=str(guild_id)+"_"+file_name,
                     guild_id=guild_id, upload_url=upload_url)
         return discord.Embed(
             title=f"File '{file_name}' created",
             color=0x00ff00)
 
     async def get_file(self, guild_id, file_name):
-        file = self.fs.find_one({"filename": file_name})
+        file = self.fs.find_one({"filename": str(guild_id)+"_"+file_name})
         if file.guild_id == guild_id:
             raw_file = discord.File(io.BytesIO(
                 file.read()), filename=file_name)
 
             if file_name.split('.')[1] in ["png", "jpg", "jpeg"]:
-                return discord.Embed(title=file.filename, description="File Delivery!", color=0x00ff00).set_image(url=file.upload_url), None
+                return discord.Embed(title=file_name, description="File Delivery!", color=0x00ff00).set_image(url=file.upload_url), None
             # TODO: return embedded MarkDown if it's a md file
             # elif file_name.split('.')[1] in ["md", "MD"]:
             #     return discord.Embed()
             else:
                 return discord.Embed(title=file.filename, description="File Delivery!", color=0x00ff00), raw_file
-        raise
+        
 
     async def list_files(self, guild_id):
         for grid_out in self.fs.find({"guild_id": guild_id}, no_cursor_timeout=True):
-            embed = discord.Embed(title=grid_out.filename, color=0x00ff00).set_thumbnail(
+            embed = discord.Embed(title=grid_out.filename.split('_', 1)[1], color=0x00ff00).set_thumbnail(
                 url=grid_out.__dict__['_file']['upload_url'])
             yield embed
   
     async def delete_all(self, guild_id):
         for grid_out in self.fs.find({"guild_id": guild_id}, no_cursor_timeout=True):
             self.fs.delete(grid_out._id)
-            embed = discord.Embed(title=f"Deleted: {grid_out.filename}", color=0xff0000).set_thumbnail(
+            embed = discord.Embed(title=f"Deleted: {grid_out.filename.split('_', 1)[1]}", color=0xff0000).set_thumbnail(
                 url=grid_out.upload_url)
             self.fs.delete(grid_out._id)
             yield embed
 
     async def delete_one(self, guild_id, file_name):
-        file = self.fs.find_one({"filename": file_name})
+        file = self.fs.find_one({"filename": str(guild_id)+"_"+file_name})
         if file.guild_id == guild_id:
-            embed = discord.Embed(title=f"Deleted: {file.filename}", color=0xff0000).set_thumbnail(
+            embed = discord.Embed(title=f"Deleted: {file_name}", color=0xff0000).set_thumbnail(
                 url=file.upload_url)
             self.fs.delete(file._id)
             return embed
