@@ -10,9 +10,20 @@ class ReputationCog(commands.Cog):
         self.active_members = {}
 
     @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system.')
-    async def reputation(self, ctx):
-        member = ctx.author.name
-        await ctx.send("Member **{}** \nReputation **{}**".format(member, self.reputation_count_tracker[ctx.guild.id][member]))
+    async def reputation(self, ctx, user: discord.Member):
+        await ctx.send("Member **{}** \nReputation **{}**".format(user.display_name, self.reputation_count_tracker[ctx.guild.id][user.display_name]))
+
+    @commands.command(name='leaderboard', brief='Shows guild\'s reputation leaderboard', description = 'View the leaderboard for reputation.')
+    async def leaderboard(self, ctx):
+        await ctx.send("**__Reputation Leaderboard__**\n")
+        tracker_list = []
+        for ele in self.reputation_count_tracker[ctx.guild.id]:
+            tracker_list.append((ele, self.reputation_count_tracker[ctx.guild.id][ele]))
+
+        tracker_list = sorted(tracker_list, key = lambda x: x[1], reverse = True)
+        for ele in tracker_list:
+
+            await ctx.send("Member: **{}** --- Reputation: {}".format(ele[0], ele[1]))
 
     @commands.Cog.listener()
     async def on_ready(self):  # we should add rep for reactions to posts and mentions
@@ -33,7 +44,8 @@ class ReputationCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        self.reputation_count_tracker[message.guild.id][message.author.name] += 1
+        if message.author.bot == False:
+            self.reputation_count_tracker[message.guild.id][message.author.name] += 1
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
