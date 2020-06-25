@@ -15,6 +15,7 @@ from Cogs.TimerCog import TimerCog
 from Cogs.TioCog import TioCog
 from Cogs.FileStorageService.FileStorageCog import FileStorageCog
 from Cogs.TimezoneCog import TimezoneCog
+from Cogs.CodeTimeCog import CodeTimeCog
 
 
 bot = commands.Bot(command_prefix='.', case_insensitive=True)
@@ -25,6 +26,7 @@ bot.add_cog(VoiceCog(bot))
 bot.add_cog(TimerCog(bot))
 bot.add_cog(HelpCog(bot))
 
+bot.add_cog(CodeTimeCog(bot))
 bot.add_cog(ChallengeCog(bot))
 bot.add_cog(DocScraperCog(bot))
 bot.add_cog(GitHubCog(bot))
