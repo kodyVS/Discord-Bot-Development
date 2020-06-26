@@ -4,7 +4,7 @@ import random
 import discord
 from discord.ext import commands
 
-discord.opus.load_opus()
+discord.opus.load_opus('opus')
 
 from Cogs.VoiceCog import VoiceCog
 from Cogs.HelpCog import HelpCog
