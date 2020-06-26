@@ -8,3 +8,4 @@ beautifulsoup4==4.9.1
 discord==1.0.1
 pynacl==1.4.0
 praw==7.0.0
+plotly==4.8.1

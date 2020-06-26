@@ -1,7 +1,8 @@
 FROM python:3.7-alpine
 
-#ENV MONGO_URI="" # your MongoDB connection string
-#ENV ENVIRONMENT="PROD"  # PROD or DEV
+ARG MONGO_URI="" 
+ARG BOT_TOKEN=""
+ARG ENVIRONMENT="PROD"  
 
 RUN apk update
 RUN apk add ffmpeg 
