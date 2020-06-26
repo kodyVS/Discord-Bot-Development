@@ -2,9 +2,11 @@ import discord
 import math
 import asyncio
 from discord.ext import commands
+import discord
 
 from Cogs.VoiceCog import VoiceCog
 
+discord.opus.load_opus()
 
 class TimerCog(commands.Cog):
     def __init__(self, bot):
