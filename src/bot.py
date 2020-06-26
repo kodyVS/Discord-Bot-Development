@@ -4,6 +4,8 @@ import random
 import discord
 from discord.ext import commands
 
+discord.opus.load_opus()
+
 from Cogs.VoiceCog import VoiceCog
 from Cogs.HelpCog import HelpCog
 from Cogs.ChallengeCog import ChallengeCog
