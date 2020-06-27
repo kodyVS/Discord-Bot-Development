@@ -4,7 +4,12 @@ import random
 import discord
 from discord.ext import commands
 
-discord.opus.load_opus('opus')
+try:
+    discord.opus.load_opus('/usr/lib/libopus.so.0.8.0')
+    print('Voice working: ' + str(discord.opus.is_loaded()))
+except:
+    print('Opus not found, Voice is not working!')
+
 
 from Cogs.VoiceCog import VoiceCog
 from Cogs.HelpCog import HelpCog

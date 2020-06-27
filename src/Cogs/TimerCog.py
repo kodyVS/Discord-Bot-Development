@@ -6,8 +6,6 @@ import discord
 
 from Cogs.VoiceCog import VoiceCog
 
-discord.opus.load_opus('opus')
-
 class TimerCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
