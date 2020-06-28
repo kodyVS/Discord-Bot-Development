@@ -6,7 +6,7 @@ import discord
 
 storage_dict = {}  # person: [7 day time, daily average, 7 day languages]
 
-users = ["Destaq", "jasonfyw", "ashdrex", "kdaniel21", "Knox", "whiskygrandee"]
+users = ["Destaq", "jasonfyw", "ashdrex", "@kdaniel21", "Knox", "whiskygrandee"]
 links = [
     "https://wakatime.com/api/v1/users/"
     + users[i]
