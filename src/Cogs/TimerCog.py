@@ -2,6 +2,7 @@ import discord
 import math
 import asyncio
 from discord.ext import commands
+import datetime
 import discord
 
 from Cogs.VoiceCog import VoiceCog
@@ -25,7 +26,10 @@ class TimerCog(commands.Cog):
             description=f"Timer set for {math.floor(time / 60)} minutes and {int(float(time % 60))} seconds.",
             color=0x00FF00,
         )
-        await ctx.send(embed=embed)
+
+        embed.set_footer(text = f"Started: {datetime.datetime.utcnow().strftime('%H:%M:%S')} UTC time.")
+
+        await ctx.send(embed = embed)
 
         for x in range(int(time)):
             while time > 0:
