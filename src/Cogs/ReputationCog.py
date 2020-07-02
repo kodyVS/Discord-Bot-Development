@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord
 from datetime import datetime
-import math
 
 class ReputationCog(commands.Cog):
     def __init__(self, bot):
@@ -9,13 +8,13 @@ class ReputationCog(commands.Cog):
         self.reputation_count_tracker = {}
         self.active_members = {}
 
-    @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system.')
+    @commands.command(name='reputation', brief='Shows member\'s reputation', description='Keeps track of a member\'s reputation through a point system. View a member\'s reputation by calling `.reputation <member name>`. If set to none, default will be message author.', aliases = ['rep', 'points'])
     async def reputation(self, ctx, user: discord.Member = None):
         if user is None:
             user = ctx.author
         await ctx.send("Member **{}** \nReputation **{}**".format(user.display_name, self.reputation_count_tracker[ctx.guild.id][user.display_name]))
 
-    @commands.command(name='leaderboard', brief='Shows guild\'s reputation leaderboard', description = 'View the leaderboard for reputation.')
+    @commands.command(name='leaderboard', brief='Shows guild\'s reputation leaderboard', description = 'View the leaderboard for reputation in your guild, sorted in descending order.', aliases=['lb'])
     async def leaderboard(self, ctx):
         await ctx.send("**__Reputation Leaderboard__**\n")
         tracker_list = []
@@ -69,7 +68,7 @@ class ReputationCog(commands.Cog):
             joined_at = datetime.strptime(leaving_member_active_since, "%m/%d/%Y, %H:%M:%S")
 
             td = datetime.now()-joined_at
-            time_points = math.ceil(((td.seconds//60)%60) * 0.25)
+            time_points = (td.seconds//60) * 0.25 # 0.25 per minute
             self.reputation_count_tracker[member.guild.id][member.name] += time_points
 
         # on voice-channel join
