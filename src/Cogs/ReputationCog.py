@@ -69,7 +69,7 @@ class ReputationCog(commands.Cog):
             joined_at = datetime.strptime(leaving_member_active_since, "%m/%d/%Y, %H:%M:%S")
 
             td = datetime.now()-joined_at
-            time_points = math.ceil(((td.seconds//60)%60) * 0.25)
+            time_points = (td.seconds//60) * 0.25 # 0.25 per minute
             self.reputation_count_tracker[member.guild.id][member.name] += time_points
 
         # on voice-channel join
