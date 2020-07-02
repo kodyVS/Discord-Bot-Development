@@ -93,7 +93,7 @@ class TimezoneCog(commands.Cog):
     @commands.command(
         name="addtime",
         brief="Add your timezone and free hours to your guilds timezone",
-        description="Makes your timezone publicly accessible. Input either your timezone (e.g. CET) or region (e.g. Africa/Cairo)\n**Usage**: .addtime <region> freehour1 freehour2 freehour3... (e.g. .addtime CET 8 17 18)",
+        description="Makes your timezone publicly accessible. Input either your timezone (e.g. CET) or region (e.g. Africa/Cairo)\n\n**Usage**: .addtime <region> freehour1 freehour2 freehour3... (e.g. .addtime CET 8 17 18)",
         aliases=[
             "mytime",
             "mytimezone",
@@ -167,7 +167,7 @@ class TimezoneCog(commands.Cog):
     @commands.command(
         name="seehours",
         brief="See somebody's free hours (adjusted to your time)",
-        description="View the target's free hours adjusted to your own time. Usage: `seehours <target name>`\n**Note**: if you have not set your timezone, it will default to UTC!",
+        description="View the target's free hours adjusted to your own time. Usage: `seehours <target name>`\n\n**Note**: if you have not set your timezone, it will default to UTC!",
         aliases=["viewhours", "viewfreetime", "seefreetime"],
     )
     async def see_hours(self, ctx, target):
