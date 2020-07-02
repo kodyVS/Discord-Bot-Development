@@ -31,7 +31,7 @@ class TimezoneCog(commands.Cog):
         aliases=["time", "tz"],
     )
     async def timezone(self, ctx, zone: str = "UTC"):
-    # returns current time of given timezone, if no time is set then return current time in UTC
+        # returns current time of given timezone, if no time is set then return current time in UTC
         fmt = "%H:%M"
         now_time = dt.now(timezone(zone))
         embed = discord.Embed(
@@ -67,35 +67,33 @@ class TimezoneCog(commands.Cog):
         name="currenthour",
         brief="Enter your current hour in 24 hour format and the bot will suggest some timezones.",
         description="Enter your current hour in 24 hour format (ex: 8 PM = 20) and the bot will return a list of timezones for you to register yourself under.",
-        aliases=[
-            "tzhelp",
-            "timehelp",
-            "hour",
-            "myhour",
-        ],
+        aliases=["tzhelp", "timehelp", "hour", "myhour",]
     )
     async def my_hour(self, ctx, hour):
         # take user hour input, subtract their time from UTC time to get their time difference
         # return list of possible timezones for them to use for adding their timezone
         if (int(hour) >= 0) and (int(hour) <= 23):
             fmt = "%H"
-            now_time = dt.now(timezone('UTC'))
+            now_time = dt.now(timezone("UTC"))
             new_time = now_time.strftime(fmt)
             hour_diff = int(hour) - int(new_time)
             hours = self.possible_timezones(hour_diff)
 
-            embed = discord.Embed(title="Possible Timezones",
-                                  description=f"The following are possible timezones you can set your time to:\n{str(hours)[1:-1]}",
-                                  color=0x00FFF00)
+            embed = discord.Embed(
+                title="Possible Timezones",
+                description=f"The following are possible timezones you can set your time to:\n{str(hours)[1:-1]}",
+                color=0x00FFF00,
+            )
             await ctx.send(embed=embed)
         else:
-            await ctx.send("Invalid hours. Enter your current hour in 24 hour format. (example: 8 PM = 20)")
-
+            await ctx.send(
+                "Invalid hours. Enter your current hour in 24 hour format. (example: 8 PM = 20)"
+            )
 
     @commands.command(
         name="addtime",
         brief="Add your timezone and free hours to your guilds timezone",
-        description="Makes your timezone publicly accessible. Input either your timezone as a region or the current hour",
+        description="Makes your timezone publicly accessible. Input either your timezone (e.g. CET) or region (e.g. Africa/Cairo)\n**Usage**: .addtime <region> freehour1 freehour2 freehour3... (e.g. .addtime CET 8 17 18)",
         aliases=[
             "mytime",
             "mytimezone",
@@ -116,9 +114,10 @@ class TimezoneCog(commands.Cog):
         }  # adding user info
 
         for x in self.col.find():
-            if list(x.keys())[1] == str(
-                ctx.author.name
-            ) and list(x.values())[1] == str(ctx.message.guild.id):  # check if USERNAME is there, not guild...
+
+            if list(x.keys())[1] == str(ctx.author.name) and list(x.values())[1][1] == str(
+                ctx.message.guild.id
+            ):  # check if USERNAME is there, not guild...
 
                 for key in x.keys():
                     if key == ctx.author.name:
@@ -126,15 +125,17 @@ class TimezoneCog(commands.Cog):
 
         self.col.insert_one(myzonedict)
 
-        embed = discord.Embed(title="Zone sent & set!",
-                              description=f"**{ctx.author.name}**'s timezone has been set to **{zone}**.",
-                              color=0x00FFF00)
+        embed = discord.Embed(
+            title="Zone sent & set!",
+            description=f"**{ctx.author.name}**'s timezone has been set to **{zone}**.",
+            color=0x00FFF00,
+        )
         await ctx.send(embed=embed)
 
     @commands.command(
         name="seezone",
         brief="See somebody's timezone",
-        description="Shows the current timezone of the person you are querying",
+        description="Shows the current timezone of the person you are querying.",
         aliases=["seetime", "seetimes", "findzone", "currenttime"],
     )
     async def see_time(self, ctx, target: str):
@@ -144,21 +145,29 @@ class TimezoneCog(commands.Cog):
             if x[target][1] == str(ctx.message.guild.id):
                 result_obj = x[target]
 
-        result_timezone = result_obj[0]
-        tz = timezone(result_timezone)
-        tz_now = dt.now(tz)
+        try:
+            result_timezone = result_obj[0]
+            tz = timezone(result_timezone)
+            tz_now = dt.now(tz)
 
-        embed = discord.Embed(
-            title="Target Timezone",
-            description=f"{target} is located in the **{result_timezone}** timezone.\nTheir current time is **{tz_now.strftime(fmt)}**.",
-            color=0x00FF00,
-        )
+            embed = discord.Embed(
+                title="Target Timezone",
+                description=f"{target} is located in the **{result_timezone}** timezone.\nTheir current time is **{tz_now.strftime(fmt)}**.",
+                color=0x00FF00,
+            )
+        except:
+            embed = discord.Embed(
+                title="Target Timezone",
+                description=f"{target} seems to have set their time incorrectly. They aren't located in a valid timezone",
+                color=0x00FF00,
+            )
 
         await ctx.send(embed=embed)
 
     @commands.command(
         name="seehours",
-        brief="See somebody's free hours (adjusted)",
+        brief="See somebody's free hours (adjusted to your time)",
+        description="View the target's free hours adjusted to your own time. Usage: `seehours <target name>`\n**Note**: if you have not set your timezone, it will default to UTC!",
         aliases=["viewhours", "viewfreetime", "seefreetime"],
     )
     async def see_hours(self, ctx, target):
@@ -172,6 +181,7 @@ class TimezoneCog(commands.Cog):
         result_timezone = result_obj[0]
 
         # adjust based on user's timezone
+        user_obj = 'UTC'
         for x in self.col.find({}, {ctx.author.name}):
 
             if x[target][1] == str(ctx.message.guild.id):
@@ -180,27 +190,35 @@ class TimezoneCog(commands.Cog):
         user_timezone = user_obj[0]
 
         # convert timezone to utc TIME & same for user_timezone
-        utc_time = dt.utcnow()
+        try:
+            utc_time = dt.utcnow()
 
-        user_time = timezone(user_timezone)
-        result_time = timezone(result_timezone)
+            user_time = timezone(user_timezone)
+            result_time = timezone(result_timezone)
 
-        user_hour = pytz.utc.localize(utc_time, is_dst=None).astimezone(user_time).hour
+            user_hour = pytz.utc.localize(utc_time, is_dst=None).astimezone(user_time).hour
 
-        result_hour = pytz.utc.localize(utc_time, is_dst = None).astimezone(result_time).hour
+            result_hour = (
+                pytz.utc.localize(utc_time, is_dst=None).astimezone(result_time).hour
+            )
 
-        result_hours = [int(hour) for hour in result_hours]
+            result_hours = [int(hour) for hour in result_hours]
 
-        target_hours_adjusted = sorted(
-            [hour + (user_hour - result_hour) for hour in result_hours]
-        )
+            target_hours_adjusted = sorted(
+                [hour + (user_hour - result_hour) for hour in result_hours]
+            )
 
-        target_hours_adjusted = [str(hour) for hour in target_hours_adjusted]
+            target_hours_adjusted = [str(hour) for hour in target_hours_adjusted]
 
-        embed = discord.Embed(
-            title="Target Adjusted Free Hours",
-            description="\n".join(target_hours_adjusted),
-        )
+            embed = discord.Embed(
+                title="Target Adjusted Free Hours",
+                description="\n".join(target_hours_adjusted),
+            )
+        except:
+            embed = discord.Embed(
+                title="Target Adjusted Free Hours",
+                description="Unfortunately, this is unavailable, as the user has set their timezone incorrectly!",
+            )
 
         await ctx.send(embed=embed)
 
@@ -221,7 +239,7 @@ class TimezoneCog(commands.Cog):
         time_list = []
         fmt = "%H:%M %Z"
 
-        for x in self.col.find():  # FIXME: damn bug that just won't go away
+        for x in self.col.find():
             prettified = list(x.items())
 
             if prettified[1][1][1] == str(ctx.message.guild.id):
@@ -233,12 +251,15 @@ class TimezoneCog(commands.Cog):
         if len(str(time_list)) < 1024:
             for i in range(len(time_list)):
 
-                tz = time_list[i][1][0]
-                tz = timezone(tz)
-                tz_now = dt.now(tz)
-                time_list[i] = str(
-                    "**" + time_list[i][0] + "**: " + tz_now.strftime(fmt)
-                )
+                try:
+                    tz = time_list[i][1][0]
+                    tz = timezone(tz)
+                    tz_now = dt.now(tz)
+                    time_list[i] = str(
+                        "**" + time_list[i][0] + "**: " + tz_now.strftime(fmt)
+                    )
+                except:
+                    time_list[i] = '**' + time_list[i][0] + '**: INVALID'
 
             embed = discord.Embed(title="All Times", color=0x00FF00)
             embed.add_field(name="User + Time", value="\n".join(time_list))
