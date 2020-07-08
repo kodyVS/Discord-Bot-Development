@@ -12,7 +12,7 @@ class TimerCog(commands.Cog):
         self.voiceCog = bot.get_cog("VoiceCog")
 
     @commands.command(name='join', brief='Bot joins channel and beeps',
-                 description='Used only for the .timer function, causes bot to join and make beeping sound.')
+                 description='Used only for the .timer function, causes bot to join and make beeping sound.', aliases=['come'])
     async def join(self, ctx):
         try:
             channel = ctx.message.author.voice.channel
@@ -33,7 +33,7 @@ class TimerCog(commands.Cog):
         except AttributeError:
             await ctx.send(f'You are not in a voice channel.')
 
-    @commands.command(pass_context=True, name='leave', brief='Causes bot to leave current voice channel')
+    @commands.command(pass_context=True, name='leave', brief='Causes bot to leave current voice channel', description='force the bot to leave the voice channel that you are in', aliases=['kick'])
     async def leave(self, ctx):
         if ctx.message.author.voice:
             server = ctx.message.guild.voice_client

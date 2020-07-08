@@ -9,7 +9,7 @@ class InfoCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name = 'docs', aliases = ['documentation', 'info'])
+    @commands.command(name = 'docs', brief = 'programming language documentation', description = 'documentation for languages, access by calling `.docs <language> <query>`', aliases = ['documentation', 'info'])
     async def docs(self, ctx, language: str, query):
         # access docs based on language
 
@@ -39,7 +39,7 @@ class InfoCog(commands.Cog):
 
             await ctx.send(embed=embed)
 
-    @commands.command(name='github')
+    @commands.command(name='github', brief = 'view top 10 daily github repos', description = 'see the names and descriptions of the top x github repos today with `.github x` (default 10)', aliases=['gh'])
     async def github(self, ctx, amount: int = 10):
         '''Gets the GitHub first < amount > repositories without embeds'''
         page = requests.get(
