@@ -14,6 +14,7 @@ links = [
     for i in range(len(users))
 ]
 
+
 def readable_hours(decimal):
 
     time_minutes = decimal * 60
@@ -23,15 +24,23 @@ def readable_hours(decimal):
     minutes_part = floor(time_minutes % 60)
     seconds_part = floor(time_seconds % 60)
 
-    return "{h} hrs {m} mins {s} secs".format(h=hours_part, m=minutes_part, s=seconds_part)
+    return "{h} hrs {m} mins {s} secs".format(
+        h=hours_part, m=minutes_part, s=seconds_part
+    )
+
 
 class CodeTimeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='code_time', brief='see everyone\'s code time', aliases=['codeboard', 'codingtime'])
+    @commands.command(
+        name="code_time",
+        brief="see everyone's code time",
+        description="view an HTML leaderboard for the number of hours and minutes coded by everyone who uses Wakatime",
+        aliases=["codeboard", "codingtime"],
+    )
     async def codetime(self, ctx):
-        await ctx.send('Processing request, please allow up to one minute...')
+        await ctx.send("Processing request, please allow up to one minute...")
         for i in range(len(users)):
             response = requests.get(links[i])
 
@@ -49,8 +58,8 @@ class CodeTimeCog(commands.Cog):
                     )
                     / 7
                     / 60,
-                    "7-day languages": [" " + 
-                        data["data"]["languages"][i]["name"]
+                    "7-day languages": [
+                        " " + data["data"]["languages"][i]["name"]
                         for i in range(len(data["data"]["languages"]))
                     ],
                 }
@@ -62,7 +71,6 @@ class CodeTimeCog(commands.Cog):
                     "7-day languages": [],
                 }
 
-
         leaderboard = sorted(
             list(storage_dict.items()), key=lambda x: x[1]["7-day time"], reverse=True
         )
@@ -70,19 +78,35 @@ class CodeTimeCog(commands.Cog):
         fig = go.Figure(
             data=[
                 go.Table(
-                    columnwidth = [100, 100, 100, 500],
+                    columnwidth=[100, 100, 100, 500],
                     header=dict(
-                        values=["Name", "7-day Time", "Daily Average", "7-day Languages"],
+                        values=[
+                            "Name",
+                            "7-day Time",
+                            "Daily Average",
+                            "7-day Languages",
+                        ],
                         line_color="darkslategray",
                         fill_color="lightskyblue",
                         align="left",
                     ),
                     cells=dict(
                         values=[
-                            [leaderboard[i][0] for i in range(len(leaderboard))],  # 1st column
-                            [readable_hours(leaderboard[i][1]["7-day time"]) for i in range(len(leaderboard))],
-                            [readable_hours(leaderboard[i][1]["daily average"]) for i in range(len(leaderboard))],
-                            [leaderboard[i][1]["7-day languages"] for i in range(len(leaderboard))],
+                            [
+                                leaderboard[i][0] for i in range(len(leaderboard))
+                            ],  # 1st column
+                            [
+                                readable_hours(leaderboard[i][1]["7-day time"])
+                                for i in range(len(leaderboard))
+                            ],
+                            [
+                                readable_hours(leaderboard[i][1]["daily average"])
+                                for i in range(len(leaderboard))
+                            ],
+                            [
+                                leaderboard[i][1]["7-day languages"]
+                                for i in range(len(leaderboard))
+                            ],
                         ],
                         line_color="darkslategray",
                         fill_color="lightcyan",
@@ -95,4 +119,4 @@ class CodeTimeCog(commands.Cog):
         # fig.show()
         fig.write_html("leaderboard.html")
 
-        await ctx.send(file=discord.File('leaderboard.html'))
+        await ctx.send(file=discord.File("leaderboard.html"))
