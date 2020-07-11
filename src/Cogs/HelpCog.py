@@ -9,7 +9,8 @@ class HelpCog(commands.Cog):
 
     @commands.command(
     name='help',
-    description='Shows list of commands.',
+    brief = 'information on various commands',
+    description='Shows a list of cogs and their commands.',
     aliases=['commands', 'commandlist'],
     )
     async def help_command(self, ctx, cog='all'):

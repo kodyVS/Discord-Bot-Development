@@ -55,7 +55,7 @@ class ChallengeCog(commands.Cog):
         else:
             await ctx.send(f'{problem_number}\n\n{problem_content}')
 
-    @commands.command(name='dailyproblem', brief='Problems from dailycodingproblem.com', description='First 365 problems from dailycodingproblem.com', aliases=['daily', 'dailycode', 'dailycodingproblem'])
+    @commands.command(name='dailyproblem', brief='Problems from dailycodingproblem.com', description='First 365 problems from dailycodingproblem.com or chosen dailycodingproblem problem based on number', aliases=['daily', 'dailycode', 'dailycodingproblem'])
     async def dailyproblem(self, ctx, number: int = -99):
         if number == -99:  # user wants random problem
             number = random.randint(1, 367)
@@ -97,7 +97,7 @@ class ChallengeCog(commands.Cog):
 
             await ctx.send(f'Problem Number: {number}\n{problem_content}')
 
-    @commands.command(name = 'reddit', brief = 'Find challenges from Reddit', description = 'Gets challenges from any subreddit! Suggested: dailyprogrammer, programmingchallenges.', aliases = ['r/', 'r/dailyprogrammer'])
+    @commands.command(name = 'reddit', brief = 'Find challenges from Reddit', description = 'Gets challenges from any subreddit! Suggested: dailyprogrammer.', aliases = ['r/', 'r/dailyprogrammer'])
     async def reddit_challenges(self, ctx, sub_reddit: str = 'dailyprogrammer', pick_from: int = 10, sort: str = 'hot'):
         # Subreddit to get challenges from
         reddit = praw.Reddit(client_id='RkdLUKFNy0Je8g', \
