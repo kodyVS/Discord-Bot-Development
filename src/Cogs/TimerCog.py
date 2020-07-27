@@ -75,13 +75,14 @@ class TimerCog(commands.Cog):
 
                     embed = discord.Embed(
                         title="Work Time's Up!",
-                        description=f"{ctx.author.mention}\nYour timer has finished! Stop working, it is break time now!",
+                        description="Your timer has finished! Stop working, it is break time now!",
                         color=0x00FF00,
                     )
 
+                    await ctx.send(f"Pinging you {ctx.author.mention}...") # mentioning doesn't work in embeds
                     message = await ctx.send(embed=embed)
-                    await self.voiceCog.join(ctx)
-                    await self.voiceCog.leave(ctx)
+                    await self.join(ctx) # VoiceCog moved to TimerCog
+                    await self.leave(ctx)
 
                 else:
                     time -= 1  # prevent infinite looping
