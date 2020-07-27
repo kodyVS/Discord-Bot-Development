@@ -9,7 +9,6 @@ import discord
 class TimerCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.voiceCog = bot.get_cog("VoiceCog")
 
     @commands.command(name='join', brief='Bot joins channel and beeps',
                  description='Used only for the .timer function, causes bot to join and make beeping sound.', aliases=['come'])
@@ -92,8 +91,8 @@ class TimerCog(commands.Cog):
                         color=0x00FF00,
                     )
 
-                    await self.voiceCog.join(ctx)
-                    await self.voiceCog.leave(ctx)
+                    await self.join(ctx)
+                    await self.leave(ctx)
 
                     thumbsup = "\N{THUMBS UP SIGN}"
                     thumbsdown = "\N{THUMBS DOWN SIGN}"
