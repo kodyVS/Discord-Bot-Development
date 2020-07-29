@@ -1,7 +1,7 @@
 import os
 import random
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 try:
     discord.opus.load_opus('/usr/lib/libopus.so.0.8.0')
@@ -39,6 +39,13 @@ bot.add_cog(TimezoneCog(bot))
 async def on_ready():
     print("PGbot is ready!")
 
+target_channel_id = 737366068120649808
+
+@tasks.loop(hours = 72)
+async def post_leaderboard(ctx):
+    message_channel = bot.get_channel(target_channel_id)
+    await ctx.send("Forming 3-day wakatime leaderboard below...")
+    await ReputationCog.codetime()
 
 @bot.event
 async def on_command_error(ctx, error):
