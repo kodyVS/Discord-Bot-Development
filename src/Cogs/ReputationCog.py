@@ -57,7 +57,7 @@ class ReputationCog(commands.Cog):
         name="code_time",
         brief="see everyone's code time",
         description="view an HTML leaderboard for the number of hours and minutes coded by everyone who uses Wakatime",
-        aliases=["codeboard", "codingtime"],
+        aliases=["codeboard", "codingtime", "wakatime", "codetime"],
     )
     async def codetime(self, ctx):
         await ctx.send("Processing request, please allow up to one minute...")
@@ -140,6 +140,95 @@ class ReputationCog(commands.Cog):
         fig.write_html("leaderboard.html")
 
         await ctx.send(file=discord.File("leaderboard.html"))
+
+
+    @commands.command(
+        name="codetimeimage",
+        brief="see everyone's code time visually",
+        description="view an image showing the number of hours and minutes coded by everyone who uses Wakatime",
+        aliases=["wakaimage", "image", "codingtimeimage"],
+    )
+    async def codetime(self, ctx):
+        await ctx.send("Processing request, please allow up to one minute...")
+        for i in range(len(users)):
+            response = requests.get(links[i])
+
+            data = response.json()
+            try:
+                storage_dict[users[i]] = {
+                    "7-day time": (
+                        int(data["data"]["categories"][0]["digital"][0:-3]) * 60
+                        + int(data["data"]["categories"][0]["digital"][-2:])
+                    )
+                    / 60,
+                    "daily average": (
+                        int(data["data"]["categories"][0]["digital"][0:-3]) * 60
+                        + int(data["data"]["categories"][0]["digital"][-2:])
+                    )
+                    / 7
+                    / 60,
+                    "7-day languages": [
+                        " " + data["data"]["languages"][i]["name"]
+                        for i in range(len(data["data"]["languages"]))
+                    ],
+                }
+
+            except:
+                storage_dict[users[i]] = {
+                    "7-day time": 0,
+                    "daily average": 0,
+                    "7-day languages": [],
+                }
+
+        leaderboard = sorted(
+            list(storage_dict.items()), key=lambda x: x[1]["7-day time"], reverse=True
+        )
+
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    columnwidth=[100, 100, 100, 500],
+                    header=dict(
+                        values=[
+                            "Name",
+                            "7-day Time",
+                            "Daily Average",
+                            "7-day Languages",
+                        ],
+                        line_color="darkslategray",
+                        fill_color="lightskyblue",
+                        align="left",
+                    ),
+                    cells=dict(
+                        values=[
+                            [
+                                leaderboard[i][0] for i in range(len(leaderboard))
+                            ],  # 1st column
+                            [
+                                readable_hours(leaderboard[i][1]["7-day time"])
+                                for i in range(len(leaderboard))
+                            ],
+                            [
+                                readable_hours(leaderboard[i][1]["daily average"])
+                                for i in range(len(leaderboard))
+                            ],
+                            [
+                                leaderboard[i][1]["7-day languages"]
+                                for i in range(len(leaderboard))
+                            ],
+                        ],
+                        line_color="darkslategray",
+                        fill_color="lightcyan",
+                        align="left",
+                    ),
+                )
+            ]
+        )
+
+        # fig.show()
+        fig.write_image("leaderboard.png")
+
+        await ctx.send(file=discord.File("leaderboard.png"))
 
     @commands.Cog.listener()
     async def on_ready(self):  # we should add rep for reactions to posts and mentions

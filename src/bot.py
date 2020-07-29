@@ -41,11 +41,14 @@ async def on_ready():
 
 target_channel_id = 737366068120649808
 
-@tasks.loop(hours = 72)
-async def post_leaderboard(ctx):
+@tasks.loop(minutes = 1)
+async def post_leaderboard():
+    print("log details: trying to post leaderboard")
     message_channel = bot.get_channel(target_channel_id)
-    await ctx.send("Forming 3-day wakatime leaderboard below...")
-    await ReputationCog.codetime()
+    await message_channel.send("Forming 3-day wakatime leaderboard below...")
+    await ReputationCog.codetimeimage()
+    await message_channel.send(file=discord.File("leaderboard.png"))
+    print("log details: image sent")
 
 @bot.event
 async def on_command_error(ctx, error):
