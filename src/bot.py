@@ -82,4 +82,5 @@ try:
 except FileNotFoundError:
     TOKEN = os.environ.get('BOT_TOKEN')
 
+post_leaderboard.start()
 bot.run(TOKEN)
