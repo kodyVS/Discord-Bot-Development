@@ -57,7 +57,7 @@ class ReputationCog(commands.Cog):
         name="code_time",
         brief="see everyone's code time",
         description="view an HTML leaderboard for the number of hours and minutes coded by everyone who uses Wakatime",
-        aliases=["codeboard", "codingtime", "wakatime", "codetime"],
+        aliases=["codeboard", "codingtime", "wakatime"],
     )
     async def codetime(self, ctx):
         await ctx.send("Processing request, please allow up to one minute...")

@@ -103,7 +103,6 @@ class TimezoneCog(commands.Cog):
             "nowork",
             "myfreehours",
             "freetime",
-            "codetime",
             "available",
         ],
     )
